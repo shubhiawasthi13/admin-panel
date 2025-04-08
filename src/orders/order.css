@@ -347,8 +347,24 @@ top: 150px;
 margin-top: 60px
 }
 .mainLeft h1{
-  text-align: left
+  text-align: left;
+  font-size: 25px;
+  font-weight: bold;
 }
+
+.order-info-container{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+ }
+ .info-box{
+  background-color: white;
+  width: 20%;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 15px 0;
+ }
 .order-filter {
   margin: 15px 0;
  width: 100%;
@@ -357,6 +373,10 @@ margin-top: 60px
   justify-content: space-between;
   background-color: white;
   padding: 10px;
+}
+.order-filter h3{
+  font-size: 18px;
+  font-weight: bold;
 }
  .order-filter .filter-select{
   font-size: 15px;

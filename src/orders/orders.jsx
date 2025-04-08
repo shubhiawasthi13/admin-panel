@@ -921,6 +921,7 @@ const Orders = () => {
 
   return (<>
   <div className="container">
+
     {/* <div className="mainLeft">
       <br></br><br /><br />
       <h1>
@@ -951,12 +952,51 @@ const Orders = () => {
     </div> */}
 {/* new changes */}
 <div className="mainLeft">
-        <h1>Order Panel</h1>
-        <hr />
+<h1>Order Panel</h1>
+<hr />
+<div className="order-info-container">
+  <div className="info-box">
+    <div>
+    <img src="./activetab.png" alt="" />
+    </div>
+    <div>
+    <h5 style={{fontSize:"17px"}}>Active Tables</h5>
+    <h5 style={{color:"black", fontWeight:"bold"}}>{newOrders.length + preparingOrders.length}</h5>
+    </div>
+  </div>
+  <div className="info-box">
+    <div>
+    <img src="./progress.png" alt="" />
+    </div>
+    <div>
+    <h5 style={{fontSize:"17px"}}>In Progress</h5>
+    <h5 style={{color:"black", fontWeight:"bold"}}>{preparingOrders.length}</h5>
+    </div>
+  </div>
+  <div className="info-box">
+    <div>
+    <img src="./totalord.png" alt="" />
+    </div>
+    <div>
+    <h5 style={{fontSize:"17px"}}>Total Orders</h5>
+    <h5 style={{color:"black", fontWeight:"bold"}}>{newOrders.length + preparingOrders.length + finishedOrders.length}</h5>
+    </div>
+  </div>
+  <div className="info-box">
+    <div>
+    <img src="./revenue.png" alt="" />
+    </div>
+    <div>
+    <h5 style={{fontSize:"17px"}}>Today's Revenue</h5>
+    <h5 style={{color:"black", fontWeight:"bold"}}>Rs.14000</h5>
+    </div>
+  </div>
+</div>
+      
         
         {/* Filter Dropdown */}
         <div className="order-filter">
-          <h3>Table Overview</h3>
+          <h3>Tables Overview</h3>
           <Select
             options={filterOptions}
             defaultValue={filterOptions[0]}
