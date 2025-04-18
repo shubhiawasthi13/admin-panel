@@ -9,6 +9,7 @@ import Reorder from './Inventory/Reorder.jsx';
 import AddDish from './add-dish/add-dish.jsx';
 import App from './App.jsx';
 import Dashboard from './dashboard/dasboard.jsx';
+import SetupPage from './Set-up/setup_page.jsx';
 
 const Orders = lazy(() => import('./orders/orders.jsx'));
 
@@ -23,6 +24,7 @@ createRoot(document.getElementById('root')).render(
             {/* <Route path="/add-dish" element={<AddDish />} /> */}
             <Route path="zomato" element={<Zomato />} />
             <Route path="inventory" element={<Inventory />} />
+            <Route path="setup" element={<SetupPage />} />
             <Route path="reorder" element={<Reorder />} />
             {/* <Route path="/settings" element={<Setting />} /> */}
             </Route>

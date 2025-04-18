@@ -49,6 +49,9 @@ function App() {
         <li class="nav-item">
           <Link to ='/inventory' class='nav-link mx-2'>Inventory</Link>
         </li>
+        <li class="nav-item">
+          <Link to ='/setup' class='nav-link mx-2'>Set up</Link>
+        </li>
       
         {/* <li class="nav-item">
           <a class="nav-link mx-2" onClick={change} id='http://localhost:3002/' href="#!"><i class="fas fa-heart pe-2"></i>Settings</a>
