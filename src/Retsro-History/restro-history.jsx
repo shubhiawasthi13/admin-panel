@@ -3,6 +3,9 @@
 import React, { useState } from 'react';
 import './history.css';
 import { FaSearch  } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+
+
 
 const mockOrders = [
   {
@@ -90,52 +93,62 @@ const mockOrders = [
 const mockInventory = [
   {
     item: 'Premium Red Wine',
-    restored: 'Apr 15, 2025 (+20 kg)',
+    restoredDate: 'Apr 15, 2025',
+    restoredQuantity: '20 kg',
     currentStock: '8 kg',
   },
   {
     item: 'Premium Red Wine',
-    restored: 'Apr 14, 2025 (+15 kg)',
+    restoredDate: 'Apr 14, 2025',
+    restoredQuantity: '15 kg',
     currentStock: '6 kg',
   },
   {
     item: 'Olive Oil',
-    restored: 'Apr 13, 2025 (+10 L)',
+    restoredDate: 'Apr 13, 2025',
+    restoredQuantity: '10 L',
     currentStock: '5 L',
   },
   {
     item: 'Cheddar Cheese',
-    restored: 'Apr 12, 2025 (+12 kg)',
+    restoredDate: 'Apr 12, 2025',
+    restoredQuantity: '12 kg',
     currentStock: '3.5 kg',
   },
   {
     item: 'Fresh Basil',
-    restored: 'Apr 11, 2025 (+5 kg)',
+    restoredDate: 'Apr 11, 2025',
+    restoredQuantity: '5 kg',
     currentStock: '2 kg',
   },
   {
     item: 'Tomato Sauce',
-    restored: 'Apr 10, 2025 (+25 L)',
+    restoredDate: 'Apr 10, 2025',
+    restoredQuantity: '25 L',
     currentStock: '10 L',
   },
   {
     item: 'Pasta',
-    restored: 'Apr 09, 2025 (+50 kg)',
+    restoredDate: 'Apr 09, 2025',
+    restoredQuantity: '50 kg',
     currentStock: '22 kg',
   },
   {
     item: 'Parmesan',
-    restored: 'Apr 08, 2025 (+10 kg)',
+    restoredDate: 'Apr 08, 2025',
+    restoredQuantity: '10 kg',
     currentStock: '4 kg',
   },
   {
     item: 'White Wine',
-    restored: 'Apr 07, 2025 (+18 kg)',
+    restoredDate: 'Apr 07, 2025',
+    restoredQuantity: '18 kg',
     currentStock: '7 kg',
   },
   {
     item: 'Tiramisu Mix',
-    restored: 'Apr 06, 2025 (+6 kg)',
+    restoredDate: 'Apr 06, 2025',
+    restoredQuantity: '6 kg',
     currentStock: '3 kg',
   },
 ];
@@ -172,6 +185,7 @@ export default function RestaurantHistory() {
   const [activeTab, setActiveTab] = useState('orders');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
+  
 
   const filteredOrders = mockOrders.filter(order => {
     const matchesSearch = order.items.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -292,22 +306,32 @@ export default function RestaurantHistory() {
         <div className="table-wrapper">
           {filteredInventory.length > 0 ? (
             <table className="orders-table">
-              <thead>
-                <tr>
-                  <th>ITEM</th>
-                  <th>RESTORED</th>
-                  <th>CURRENT STOCK</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredInventory.map((entry, idx) => (
-                  <tr key={idx}>
-                    <td style={{fontWeight:"bold"}}>{entry.item}</td>
-                    <td>{entry.restored}</td>
-                    <td>{entry.currentStock}</td>
-                  </tr>
-                ))}
-              </tbody>
+        <thead>
+  <tr>
+    <th>ITEM</th>
+    <th>OLD STOCK</th>
+    <th>RESTORED</th>
+    <th>CURRENT STOCK</th>
+  </tr>
+</thead>
+<tbody>
+  {filteredInventory.map((entry, idx) => {
+    const unit = entry.currentStock.match(/[a-zA-Z]+/)[0];
+    const currentVal = parseFloat(entry.currentStock);
+    const restoredVal = parseFloat(entry.restoredQuantity);
+    const oldVal = (currentVal + restoredVal).toFixed(2);
+
+    return (
+      <tr key={idx}>
+        <td style={{ fontWeight: "bold" }}>{entry.item}</td>
+        <td>{entry.currentStock}</td>
+        <td>{entry.restoredDate} (+{entry.restoredQuantity})</td>
+        <td>{oldVal} {unit}</td>
+      </tr>
+    );
+  })}
+</tbody>
+
             </table>
           ) : (
             <div className="no-data-message">
