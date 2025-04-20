@@ -10,6 +10,9 @@ import AddDish from './add-dish/add-dish.jsx';
 import App from './App.jsx';
 import Dashboard from './dashboard/dasboard.jsx';
 import SetupPage from './Set-up/setup_page.jsx';
+import ReportPage from './Report/report.jsx'
+import RestaurantHistory from './Retsro-History/restro-history.jsx';
+
 
 const Orders = lazy(() => import('./orders/orders.jsx'));
 
@@ -25,6 +28,8 @@ createRoot(document.getElementById('root')).render(
             <Route path="zomato" element={<Zomato />} />
             <Route path="inventory" element={<Inventory />} />
             <Route path="setup" element={<SetupPage />} />
+            <Route path="report" element={<ReportPage />} />
+            <Route path="history" element={<RestaurantHistory />} />
             <Route path="reorder" element={<Reorder />} />
             {/* <Route path="/settings" element={<Setting />} /> */}
             </Route>

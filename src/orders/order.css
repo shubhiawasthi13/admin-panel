@@ -1,6 +1,5 @@
 body {
     font-family: Arial, sans-serif;
-    margin: 20px;
     padding: 0;
 }
 
@@ -343,13 +342,18 @@ top: 150px;
 }
 
 /* Add to order.css */
-.mainLeft{
-margin-top: 60px
+.order-page-container{
+  width: 90%;
+  margin: auto;
 }
-.mainLeft h1{
+.order-page-container h1{
   text-align: left;
-  font-size: 25px;
-  font-weight: bold;
+  margin-top: 60px;
+  font-size: 30px;
+
+}
+.mainLeft{
+margin-top: 30px
 }
 
 .order-info-container{

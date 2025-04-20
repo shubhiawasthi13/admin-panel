@@ -920,7 +920,7 @@ const Orders = () => {
 
 
   return (<>
-  <div className="container">
+  <div className="order-page-container">
 
     {/* <div className="mainLeft">
       <br></br><br /><br />
@@ -951,9 +951,9 @@ const Orders = () => {
       />
     </div> */}
 {/* new changes */}
-<div className="mainLeft">
 <h1>Order Panel</h1>
 <hr />
+<div className="mainLeft">
 <div className="order-info-container">
   <div className="info-box">
     <div>
@@ -1025,6 +1025,9 @@ const Orders = () => {
           </div>
         </div>
         </div>
+
+
+
 
      {/* add item Modal */}
 {isAddItemModalOpen && (    
