@@ -11,7 +11,7 @@ const sampleData = [
     tableNo: '14',
     time: 'Apr 17, 2025 - 11:23 AM',
     item: 'Grilled Salmon',
-    quantity: '1',
+    quantity: '2',
     price: 450,
     discount: 0,
     remarks: 'Item manually added to bill',
@@ -47,10 +47,9 @@ const sampleData = [
     tableNo: '8',
     time: 'Apr 17, 2025 - 12:23 AM',
     item: 'Entire Bill',
-    quantity: '15%',
+    quantity: '10%',
     remarks: 'Manual discount was applied to bill total',
-    originalTotal: 1200,
-    discountedTotal: 1020,
+    originalTotal: 1000,
   },
 ];
 
@@ -78,35 +77,51 @@ const ReportPage = () => {
   });
   
   
-
   const downloadReport = () => {
-    setIsDownloading(true); // Start loading
-
+    setIsDownloading(true);
+  
     setTimeout(() => {
       const doc = new jsPDF();
       doc.setFontSize(18);
       doc.text('Restaurant Report', 14, 22);
-
+  
       const tableColumn = ['Table No.', 'Time', 'Item Name', 'Quantity', 'Remarks'];
       const tableRows = filteredData.map((entry) => {
-        let remarks = entry.remarks;
-        
-        if (entry.changeType && entry.remarks.toLowerCase().includes('quantity')) {
-          remarks += ` | Change: ${entry.changeType === 'increase' ? 'Quantity Increased' : 'Quantity Decreased'}`;
+        let remarks = entry.remarks || '';
+  
+        if (
+          entry.originalTotal &&
+          typeof entry.quantity === 'string' &&
+          entry.quantity.includes('%')
+        ) {
+          const percent = parseFloat(entry.quantity);
+          if (!isNaN(percent)) {
+            const discountAmount = (percent / 100) * entry.originalTotal;
+            const finalTotal = entry.originalTotal - discountAmount;
+  
+            remarks = `Manual discount applied to bill total.\nOriginal Total: ₹${Math.round(entry.originalTotal)}\nDiscounted Total: ₹${Math.round(finalTotal)}`;
+          }
+        } else {
+          if (entry.changeType && entry.remarks?.toLowerCase().includes('quantity')) {
+            remarks += `\nChange: ${entry.changeType === 'increase' ? 'Quantity Increased' : 'Quantity Decreased'}`;
+          }
+  
+          if (entry.price !== undefined) {
+            remarks += `\nUnit Price: ₹${entry.price}`;
+            if (entry.quantity && !isNaN(entry.quantity)) {
+              remarks += `\nTotal: ₹${entry.price * Number(entry.quantity)}`;
+            }
+          }
+  
+          if (entry.discount !== undefined && entry.discount > 0) {
+            remarks += `\nAfter Discount: ₹${entry.price - entry.discount}`;
+          }
+  
+          if (entry.originalTotal && entry.discountedTotal) {
+            remarks += `\nOriginal Total: ₹${entry.originalTotal}\nDiscounted Total: ₹${entry.discountedTotal}`;
+          }
         }
-      
-        if (entry.price !== undefined) {
-          remarks += ` | Price: ₹${entry.price}`;
-        }
-      
-        if (entry.discount !== undefined && entry.discount > 0) {
-          remarks += ` | After Discount: ₹${entry.price - entry.discount}`;
-        }
-      
-        if (entry.originalTotal && entry.discountedTotal) {
-          remarks += ` | Original Total: ₹${entry.originalTotal} | Discounted Total: ₹${entry.discountedTotal}`;
-        }
-      
+  
         return [
           entry.tableNo,
           entry.time,
@@ -115,20 +130,34 @@ const ReportPage = () => {
           remarks,
         ];
       });
-      
-      
+  
       autoTable(doc, {
         head: [tableColumn],
         body: tableRows,
         startY: 30,
         theme: 'grid',
+        useCss: true, // Let autoTable handle wrapping
+        styles: {
+          fontSize: 10,
+          cellPadding: 3,
+        },
+        columnStyles: {
+          4: { cellWidth: 90 }, // Widen remarks column more
+        },
+        headStyles: {
+          fillColor: [41, 128, 185],
+          textColor: 255,
+          fontSize: 11,
+        },
       });
-
+  
       doc.save('report.pdf');
-
-      setIsDownloading(false); // Stop loading
-    }, 1000); // Simulated delay for UX
+      setIsDownloading(false);
+    }, 1000);
   };
+  
+  
+  
 
   return (
     <>
@@ -204,36 +233,64 @@ const ReportPage = () => {
                 <td>{entry.time}</td>
                 <td>{entry.item}</td>
                 <td>{entry.quantity}</td>
-                <td>
-  {entry.remarks}
-  {entry.changeType && entry.remarks.toLowerCase().includes('quantity') && (
+<td>
+  {entry.originalTotal && typeof entry.quantity === 'string' && entry.quantity.includes('%') ? (
     <>
-      <br />
-      <strong>Change:</strong>{' '}
-      {entry.changeType === 'increase' ? 'Quantity Increased' : 'Quantity Decreased'}
+      {(() => {
+        const percent = parseFloat(entry.quantity);
+        if (!isNaN(percent)) {
+          const discountAmount = (percent / 100) * entry.originalTotal;
+          const finalTotal = entry.originalTotal - discountAmount;
+
+          return (
+            <>
+              <strong>
+                Manual discount of ₹{Math.round(discountAmount)} ({entry.quantity}) was applied to bill total.
+              </strong>
+              <br />
+              <strong>Original Total:</strong> ₹{Math.round(entry.originalTotal)}
+              <br />
+              <strong>Discounted Total:</strong> ₹{Math.round(finalTotal)}
+            </>
+          );
+        } else {
+          return <>{entry.remarks}</>;
+        }
+      })()}
     </>
-  )}
-  {entry.price !== undefined && (
+  ) : (
     <>
-      <br />
-      <strong>Price:</strong> ₹{entry.price}
-    </>
-  )}
-  {entry.discount !== undefined && entry.discount > 0 && (
-    <>
-      <br />
-      <strong>After Discount:</strong> ₹{entry.price - entry.discount}
-    </>
-  )}
-  {entry.originalTotal && entry.discountedTotal && (
-    <>
-      <br />
-      <strong>Original Total:</strong> ₹{entry.originalTotal}
-      <br />
-      <strong>Discounted Total:</strong> ₹{entry.discountedTotal}
+      {entry.remarks}
+      {entry.changeType && entry.remarks?.toLowerCase().includes('quantity') && (
+        <>
+          <br />
+          <strong>Change:</strong>{' '}
+          {entry.changeType === 'increase' ? 'Quantity Increased' : 'Quantity Decreased'}
+        </>
+      )}
+      {entry.price !== undefined && (
+        <>
+          <br />
+          <strong>Unit Price:</strong> ₹{Math.round(entry.price)}
+          {entry.quantity && !isNaN(entry.quantity) && (
+            <>
+              <br />
+              <strong>Total:</strong> ₹{Math.round(entry.price * Number(entry.quantity))}
+            </>
+          )}
+        </>
+      )}
+      {entry.discount !== undefined && entry.discount > 0 && (
+        <>
+          <br />
+          <strong>After Discount:</strong> ₹{Math.round(entry.price - entry.discount)}
+        </>
+      )}
     </>
   )}
 </td>
+
+
 
 
               </tr>
