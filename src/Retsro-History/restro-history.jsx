@@ -528,7 +528,7 @@ const mockOrders = [
     tableNo: '08',
     dateTime: 'Apr 11, 2025 - 05:10 PM',
     items: 'Sushi Platter, Miso Soup',
-    total: '₹1220.00',
+    total: '₹900.00',
     count: 2,
   },
   {
@@ -640,8 +640,7 @@ const Modal = ({data, tableNo, closeModal }) => {
         <ul className="orders-list" style={{listStyleType: 'none', paddingLeft: '0'}}>
           {data.map((entry, index) => (
             <li key={index} style={{marginTop: "15px", borderBottom: "1px solid #ccc", paddingBottom: "10px"}}>
-              <strong>TABLE NO.</strong>: {entry.tableNo}
-              <br />
+            
               <strong>TIME</strong>: {entry.time}
               <br />
               <strong>ITEM NAME</strong>: {entry.item}
@@ -659,9 +658,9 @@ const Modal = ({data, tableNo, closeModal }) => {
 
                       return (
                         <>
-                          <strong>
+                        
                             Manual discount of ₹{Math.round(discountAmount)} ({entry.quantity}) was applied to bill total.
-                          </strong>
+                        
                           <br />
                           <strong>Original Total:</strong> ₹{Math.round(entry.originalTotal)}
                           <br />

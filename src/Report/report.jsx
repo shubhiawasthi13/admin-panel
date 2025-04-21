@@ -47,7 +47,7 @@ const sampleData = [
     tableNo: '8',
     time: 'Apr 17, 2025 - 12:23 AM',
     item: 'Entire Bill',
-    quantity: '10%',
+    quantity: '15%',
     remarks: 'Manual discount was applied to bill total',
     originalTotal: 1000,
   },
