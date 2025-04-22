@@ -552,7 +552,7 @@ const ReportPage = () => {
                           const finalTotal = entry.originalTotal - discountAmount;
                           return (
                             <>
-                              <strong>Manual discount of was applied to bill total.</strong>
+                              <strong> Manual discount of ₹{Math.round(discountAmount)} ({entry.quantity}) was applied to bill total.</strong>
                               <br />
                               <strong>Total Discount:</strong> ₹{Math.round(discountAmount)}
                               <br />
