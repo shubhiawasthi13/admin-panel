@@ -143,3 +143,154 @@
     right: 30px;
   }
   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  .no-orders {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    font-size: 20px;
+  }
+  
+  /* Order Details Modal */
+  .order-details-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background-color: white;
+    padding: 25px;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+  }
+  
+  .close-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+  }
+  
+  .order-meta {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .order-meta p {
+    margin: 5px 0;
+  }
+  
+  .order-items-list {
+    margin-bottom: 20px;
+  }
+  
+  .order-item-detail {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed #eee;
+  }
+  
+  .item-name {
+    flex: 2;
+  }
+  
+  .item-quantity {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .item-price {
+    flex: 1;
+    text-align: right;
+  }
+  
+  .order-total {
+    text-align: right;
+    font-size: 18px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+  }
+  
+  @media (max-width: 768px) {
+    .order-history-header,
+    .order-history-item {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .order-history-header div:nth-child(4),
+    .order-history-header div:nth-child(5),
+    .order-history-item div:nth-child(4),
+    .order-history-item div:nth-child(5) {
+      display: none;
+    }
+    
+    .modal-content {
+      width: 95%;
+    }
+  }
+  .clickable-items {
+    cursor: pointer;
+    color: #0066cc;
+    
+  }
+  
+  .clickable-items:hover {
+    color: #004499;
+  }

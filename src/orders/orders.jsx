@@ -439,38 +439,7 @@ const Orders = () => {
 
  
   
- //new changes-- fetch dish name 
-  // useEffect(() => {
-  //   console.log("Fetching menu...");
 
-  //   const fetchData = async () => {
-  //     try {
-  //       const response = await fetch("https://eatopae-backend-trials.onrender.com/api/menu", {
-  //         method: "GET",
-  //         headers: { "Content-Type": "application/json" },
-  //       });
-
-  //       if (!response.ok) {
-  //         throw new Error(`API Error: ${response.statusText}`);
-  //       }
-
-  //       const data = await response.json();
-  //       //console.log("API Data:", data); // Debugging: Log API response
-
-  //       // Extract dish names
-  //       let extractedDishes = [];
-  //       if (Array.isArray(data)) {
-  //         extractedDishes = data.map((dish) => ({ label: dish.dish_name, value: dish.dish_name }));
-  //       }
-
-  //       setDishes(extractedDishes);
-  //     } catch (error) {
-  //       console.error("Error fetching menu:", error.message);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, []);
 
 
   useEffect(() => {
@@ -551,184 +520,8 @@ const Orders = () => {
     setEditOrdersSatatus(false);
   }
 
-  const triggerPrint = (item,orders,time) => {
-    // Create a new printable window
-    const printWindow = window.open("", "_blank");
-    const receiptContent = `<div
-          id="receipt"
-          style={{
-            border: "1px solid #ddd",
-            padding: "10px",
-            maxWidth: "58mm",
-            margin: "auto",
-          }}
-        >
-          <h2 style={{ textAlign: "center" }}>Restaurant Name</h2>
-          <h3 style={{ textAlign: "center" }}>Order Receipt</h3>
-          <div className="details">
-            <p>
-              <strong>Table No:</strong> ${item.table_no}
-            </p>
-            <p>
-              <strong>Order No:</strong> ${item.order_no}
-            </p>
-            <p>
-              <strong>Order Id:</strong> ${item.order_id}
-            </p>
-          </div>
-          <div className="order-list">
-            <ol>
-              ${orders.map( (item)=>{
-                return `<li> 
-                  ${ item.dish_name } x ${ item.quantity } 
-                </li>`;
-              } )}
-            </ol>
-          </div>
-          <div className="time">
-            <p>
-              <strong>Time:</strong> ${time}
-            </p>
-          </div>
-        </div>`;
 
-    // Add content to the new window
-    printWindow.document.open();
-    printWindow.document.write(`
-      <html>
-      <head>
-        <title>Receipt</title>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-          }
-          #receipt {
-            border: 1px solid #ddd;
-            padding: 20px;
-            max-width: 400px;
-            margin: auto;
-          }
-          h2, h3, p {
-            margin: 5px 0;
-          }
-          .details {
-            margin-bottom: 10px;
-          }
-          .order-list {
-            margin-bottom: 10px;
-          }
-          .order-list ol {
-            padding-left: 20px;
-          }
-          .order-list li {
-            margin-bottom: 5px;
-          }
-        </style>
-      </head>
-      <body onload="window.print(); window.close();">
-        ${receiptContent}
-      </body>
-      </html>
-    `);
-    printWindow.document.close();
-  };
 
-  const triggerPrintForCustomer = (item,orders,time,date) => {
-    // Create a new printable window
-    const printWindow = window.open("", "_blank");
-    const receiptContent = `<h2>Customer Receipt</h2>
-    <hr>
-    <p class="center">
-        <strong>Four Season</strong><br>
-        Address Line<br>
-        GSTIN: 22AAAAA0000A1Z5<br>
-        FSSAI: 11223344556677
-    </p>
-    <hr>
-    <p>Date/Time: <strong> ${time} , ${date}</strong></p>
-    <p>Order ID: <strong> ${item.order_id} </strong></p>
-    <p>Table No: <strong> ${item.table_no} </strong></p>
-    <hr>
-    <table class="item-table">
-      ${orders.map( (ord)=>{
-        return `<tr> 
-          <th> ${ ord.dish_name }</th>
-          <th> qty.${ ord.quantity } </th>
-          <th> ₹${ord.dish_cost*ord.quantity} </th>
-        </tr>`;
-      } )}
-    </table>
-    <hr>
-    <div class="total">
-        <span>Subtotal:</span>
-        <span>₹${gettotalcost(item)} </span>
-    </div>
-    <div class="total">
-        <span>Taxes (5%):</span>
-        <span>₹${(gettotalcost(item) * .05)}</span>
-    </div>
-    <div class="total">
-        <strong>Grand Total:</strong>
-        <strong>₹${gettotalcost(item)+ (gettotalcost(item) * .05)}</strong>
-    </div>
-    <hr>
-    <p class="center">Thank you for dining with us!<br>Visit again soon!</p>
-    <p class="center"><strong>Powered by EatPae</strong></p>`;
-
-    // Add content to the new window
-    printWindow.document.open();
-    printWindow.document.write(`
-      <html>
-      <head>
-        <title>Customer Receipt</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            max-width: 400px;
-            margin: 20px auto;
-            padding: 10px;
-            border: 1px solid #ccc;
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        hr {
-            border: none;
-            border-top: 1px dashed #000;
-            margin: 5px 0;
-        }
-        .center {
-            text-align: center;
-        }
-        .item-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        .item-table th, .item-table td {
-            text-align: left;
-            padding: 5px 0;
-        }
-        .item-table td:last-child {
-            text-align: right;
-        }
-        .total {
-            display: flex;
-            justify-content: space-between;
-            margin: 5px 0;
-        }
-    </style>
-      </head>
-      <body onload="window.print(); window.close();">
-        ${receiptContent}
-      </body>
-      </html>
-    `);
-    printWindow.document.close();
-  };
 
   function getTime(){
     const d = new Date();
@@ -782,8 +575,7 @@ const Orders = () => {
       )
       console.log(ord.order_details);
     } )
-    
-    // triggerPrint(item,order_details,getTime());
+
     setStatus(false);
     setEditOrdersSatatus(false);
   }
@@ -804,7 +596,6 @@ const Orders = () => {
       console.log(ord.order_details);
     } )
 
-    // triggerPrintForCustomer(item,order_details,getTime(),getCurrentDate());
     setStatus(false);
     setEditOrdersSatatus(false);
   }
@@ -922,34 +713,6 @@ const Orders = () => {
   return (<>
   <div className="order-page-container">
 
-    {/* <div className="mainLeft">
-      <br></br><br /><br />
-      <h1>
-        Order Panel
-      </h1>
-      <OrderSection
-        title="New Orders"
-        orders={newOrders}
-        reqStatus={0}
-        onUpdateStatus={updateOrderStatus}
-        handleSlectedTable = {handleSlectedTable}
-
-      />
-      <OrderSection
-        title="Preparing Orders"
-        orders={preparingOrders}
-        reqStatus={1}
-        onUpdateStatus={updateOrderStatus}
-        handleSlectedTable = {handleSlectedTable}
-      />
-      <OrderSection
-        title="Finished Orders"
-        orders={finishedOrders}
-        reqStatus={2}
-        onUpdateStatus={updateOrderStatus}
-        handleSlectedTable = {handleSlectedTable}
-      />
-    </div> */}
 {/* new changes */}
 <h1>Order Panel</h1>
 <hr />
@@ -1142,8 +905,7 @@ const Orders = () => {
          Accept and Print
         </button>}
         { orderStatus == 1 && !editOrderStatus && <button className="btn-print" onClick={() => { confirmAction(item) } } > Order Completed </button>}
-        {/* { orderStatus == 1 && <button className="btn-print" onClick={() => { editOrder() } } > { editOrderStatus ? `Save` : `Edit Order` } </button>} */}
-       {/* { orderStatus == 2 && <button className="btn-print" onClick={billPrint}>Print Bill</button>} */}
+   
         { orderStatus == 2 && <button 
                 onClick={() =>{billPrint(item)}}
                 disabled={loading} 
@@ -1165,141 +927,10 @@ const Orders = () => {
   </>);
 };
 
-// const OrderSection = ({ title, orders, reqStatus, onUpdateStatus, handleSlectedTable }) => {
-//   return (
-//     <>
-//     <h2>{title}<span style={{color:"grey"}}>{orders.length}</span></h2>
-//     <div className={`order-section ${title.replace(" ", "").toLowerCase()}`}>
-//       <div className="order-container">
-//         {orders.map((order) => (
-//           <OrderCard
-//             key={order.order_id}
-//             order={order}
-//             reqStatus={reqStatus}
-//             onUpdateStatus={onUpdateStatus}
-//             handleSlectedTable = {handleSlectedTable}
-//           />
-//         ))}
-//       </div>
-//     </div>
-//     </>
-  
-//   );
-// };
-
-// const OrderCard = ({ order, reqStatus, onUpdateStatus, handleSlectedTable }) => {
-//   // console.log(order);
-//   // Filter order items based on the requested status
-//   const filteredItems = order.order_items.filter(
-//     (item) => item.order_status === reqStatus
-//   );
-
-//   if (filteredItems.length === 0) {
-//     return null;
-//   }
-  
-//   function getTime(){
-//     const d = new Date();
-//     let hour = d.getHours();
-//     let minutes = d.getMinutes();
-//     if(hour < 13){ return `${hour}:${minutes} AM` }
-//     return `${hour-12}:${minutes} PM`;
-//   }
-//   function getCurrentDate() {
-//     const today = new Date();
-//     const day = today.getDate();
-//     const month = today.getMonth() + 1; // JavaScript months are 0-indexed
-//     const year = today.getFullYear();
-  
-//     return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-//   }
-
-//   const acceptAction = (item,order) =>{
-//     onUpdateStatus(
-//       item.order_no,
-//       1,
-//       order.order_id,
-//       item.order_details
-//     )
-    
-//     triggerPrint(item,order,getTime());
-//   }
-  
-//   const confirmAction = (item,order) => {
-//     onUpdateStatus(
-//       item.order_no,
-//       2,
-//       order.order_id,
-//       item.order_details
-//     )
-//     triggerPrintForCustomer(item,order,getTime(),getCurrentDate());
-//   }
-
-//   const gettotalcost =(item)=>{
-//     let cost = 0;
-//     item.order_details.map((item)=>{
-//       cost+=item.quantity*item.dish_cost})
-//       console.log(cost)
-//       return cost;
-//   }
-
-//   let c = 1;
-//   return (
-//     <div className="order-card order-column" onClick={()=>(handleSlectedTable(order, reqStatus ))}>
-//       <div className="orderBox" >
-//         Table no. { order.table_no } 
-//       </div>
-//       <p>
-//         <strong>Order ID:</strong> {order.order_id}
-//       </p>
-//       {/* <div className="order-items">
-//         {filteredItems.map((item) => (
-//           <div className="order-item" key={item.order_no}>
-//             <p>
-//               <strong>Item No:</strong> {item.order_no}
-//             </p>
-//             <p>
-//               <strong>Total amount:</strong>{gettotalcost(item)}
-//             </p>
-//             <p>
-//               <strong>Details:</strong> 
-//                 {item.order_details.map( (item)=>{
-//                   return <> <br/> {c++}. { item.dish_name } x { item.quantity } </>;
-//                 } )}
-//             </p>
-//             { item.order_status == 0 && <button className="printButton" onClick={ ()=>{ acceptAction(item,order) } } >
-//               Prt
-//             </button> }
-//             { item.order_status == 1 && <button onClick={() => { confirmAction(item,order) } } >
-//               Order Completed
-//             </button>}
-//           </div>
-//         ))}
-//       </div> */}
-//     </div>
-//   );
-// };
-
-//new.................
 
 
 
-// const OrderCard = ({ order, reqStatus, statusLabel, statusClass, onUpdateStatus, handleSlectedTable }) => {
-//   // ... existing code ...
 
-//   return (
-//     <div className={`order-card order-column ${statusClass}`} onClick={() => handleSlectedTable(order, reqStatus)}>
-//       <div className="orderBox">
-//         Table no. {order.table_no}
-//         <span className="status-badge">{statusLabel}</span>
-//       </div>
-//       <p>
-//         <strong>Order ID:</strong> {order.order_id}
-//       </p>
-//       {/* ... rest of your card content ... */}
-//     </div>
-//   );
-// };
 {/* new changes */}
 const OrderCard = ({ order, status, onUpdateStatus, handleSlectedTable }) => {
   const statusMap = {
