@@ -760,6 +760,7 @@ export default function RestaurantHistory() {
   const [showDetails, setShowDetails] = useState(false);
   const [filteredFinishedOrders, setFilteredFinishedOrders] = useState([]);
 
+
   useEffect(() => {
     socket.on("orderUpdate", (data) => {
       console.log("Order Update Received: ", data);
@@ -776,43 +777,70 @@ export default function RestaurantHistory() {
 
 // Filter orders based on search term and selected date
   useEffect(() => {
-  if (finishedOrders.length > 0) {
-    const filtered = finishedOrders.filter(order => {
-      const searchTermLower = searchTerm.toLowerCase().trim();
+    if (finishedOrders.length > 0) {
+      const filtered = finishedOrders.filter(order => {
+        const searchTermLower = searchTerm.toLowerCase().trim();
+        
+        // If empty search, only apply date filter if selected
+        // if (!searchTermLower) {
+        //   if (!selectedDate) return true;
+        //   const orderDate = new Date(order.created_at).toISOString().split('T')[0];
+        //   return orderDate === selectedDate;
+        // }
+  
+        // Check if searching by order ID (starts with #)
+        if (searchTermLower.startsWith('#')) {
+          const searchId = searchTermLower.substring(1);
+          const matchesOrderId = order.order_id.toString().includes(searchId);
+          
+          if (!selectedDate) return matchesOrderId;
+          const orderDate = new Date(order.created_at).toISOString().split('T')[0];
+          return matchesOrderId && (orderDate === selectedDate);
+        }
+  
+        // Check if searching by table number (starts with "table" or is numeric)
+        const isTableSearch = searchTermLower.startsWith('table') || /^\d+$/.test(searchTermLower);
+        if (isTableSearch) {
+          let tableSearchTerm = searchTermLower;
+          if (searchTermLower.startsWith('table')) {
+            tableSearchTerm = searchTermLower.replace('table', '').trim();
+          }
+          
+          const tableNoStr = order.table_no.toString().toLowerCase();
+          const matchesTableNo = 
+            tableNoStr.includes(tableSearchTerm) ||
+            tableNoStr.padStart(2, '0').includes(tableSearchTerm);
+  
+          if (!selectedDate) return matchesTableNo;
+          const orderDate = new Date(order.created_at).toISOString().split('T')[0];
+          return matchesTableNo && (orderDate === selectedDate);
+        }
+  
+        // General search (items, table no, or order id)
+        const tableNoStr = order.table_no.toString().toLowerCase();
+        const matchesTableNo = 
+          tableNoStr.includes(searchTermLower) ||
+          `table ${tableNoStr}`.includes(searchTermLower) ||
+          tableNoStr.padStart(2, '0').includes(searchTermLower);
+  
+        const matchesOrderId = order.order_id.toString().includes(searchTermLower);
+  
+        const matchesItemNames = order.order_items.some(item => 
+          item.order_details.some(detail => 
+            detail.dish_name.toLowerCase().includes(searchTermLower)
+          )
+        );
+  
+        const matchesSearch = matchesTableNo || matchesOrderId || matchesItemNames;
+        
+        if (!selectedDate) return matchesSearch;
+        
+        const orderDate = new Date(order.created_at).toISOString().split('T')[0];
+        return matchesSearch && (orderDate === selectedDate);
+      });
       
-      // // If no search term, only apply date filter if selected
-      // if (!searchTermLower) {
-      //   if (!selectedDate) return true;
-      //   const orderDate = new Date(order.created_at).toISOString().split('T')[0];
-      //   return orderDate === selectedDate;
-      // }
-
-      // 1. Search by table number (multiple formats)
-      const tableNoStr = order.table_no.toString().toLowerCase();
-      const matchesTableNo = 
-        tableNoStr.includes(searchTermLower) || // "1"
-        `table ${tableNoStr}`.includes(searchTermLower) || // "table 1"
-        tableNoStr.padStart(2, '0').includes(searchTermLower); // "01"
-
-      // 2. Search by item names
-      const matchesItemNames = order.order_items.some(item => 
-        item.order_details.some(detail => 
-          detail.dish_name.toLowerCase().includes(searchTermLower)
-        )
-      );
-
-      // Combine only table no and item name conditions
-      const matchesSearch = matchesTableNo || matchesItemNames;
-      
-      // Apply date filter if selected
-      if (!selectedDate) return matchesSearch;
-      
-      const orderDate = new Date(order.created_at).toISOString().split('T')[0];
-      return matchesSearch && (orderDate === selectedDate);
-    });
-    
-    setFilteredFinishedOrders(filtered);
-  }
+      setFilteredFinishedOrders(filtered);
+    }
   }, [searchTerm, finishedOrders]);
 
   const formatDateTime = (dateString) => {
@@ -899,6 +927,7 @@ export default function RestaurantHistory() {
             </button>
           )}
         </div>
+        
         <div className="filter-group">
           {!searchTerm && (
             <FaSearch style={{position:"absolute", top:"40px" ,left:"10px",color:"grey"}}/>
@@ -910,8 +939,11 @@ export default function RestaurantHistory() {
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{marginTop:"25px"}}
           />
+            <p style={{color:"grey", fontSize:'12px'}}>start with # for order ID search [ex- #26]</p>
         </div>
+        
       </div>
+      
       
       {/* Tabs */}
       <div className="tabs">
@@ -993,9 +1025,8 @@ export default function RestaurantHistory() {
                   <p><strong>Date & Time:</strong> {formatDateTime(selectedOrder.created_at)}</p>
                   <p><strong>Status:</strong> Completed</p>
                 </div>
-
+                <h4>Items</h4>
                 <div className="order-items-list">
-                  <h3>Items</h3>
                   {selectedOrder.order_items.flatMap(item => 
                     item.order_details.map((detail, index) => (
                       <div key={index} className="order-item-detail">
@@ -1008,7 +1039,7 @@ export default function RestaurantHistory() {
                 </div>
 
                 <div className="order-total">
-                  <h3>Total: ₹{calculateTotal(selectedOrder).toFixed(2)}</h3>
+                  <h5>Total: ₹{calculateTotal(selectedOrder).toFixed(2)}</h5>
                 </div>
               </div>
             </div>
