@@ -11,10 +11,11 @@ import App from './App.jsx';
 import Dashboard from './dashboard/dasboard.jsx';
 import SetupPage from './Set-up/setup_page.jsx';
 import ReportPage from './Report/report.jsx'
-import RestaurantHistory from './Retsro-History/restro-history.jsx';
+// import RestaurantHistory from './Retsro-History/restro-history.jsx';
 
 
 const Orders = lazy(() => import('./orders/orders.jsx'));
+const RestaurantHistory = lazy(() => import('./Retsro-History/restro-history.jsx'));
 
 createRoot(document.getElementById('root')).render(
         <>
