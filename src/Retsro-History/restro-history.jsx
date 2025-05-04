@@ -590,68 +590,6 @@ const sampleData = [
   },
 ];
 
-const mockInventory = [
-  {
-    item: 'Premium Red Wine',
-    restoredDate: 'Apr 15, 2025',
-    restoredQuantity: '20 kg',
-    currentStock: '8 kg',
-  },
-  {
-    item: 'Premium Red Wine',
-    restoredDate: 'Apr 14, 2025',
-    restoredQuantity: '15 kg',
-    currentStock: '6 kg',
-  },
-  {
-    item: 'Olive Oil',
-    restoredDate: 'Apr 13, 2025',
-    restoredQuantity: '10 L',
-    currentStock: '5 L',
-  },
-  {
-    item: 'Cheddar Cheese',
-    restoredDate: 'Apr 12, 2025',
-    restoredQuantity: '12 kg',
-    currentStock: '3.5 kg',
-  },
-  {
-    item: 'Fresh Basil',
-    restoredDate: 'Apr 11, 2025',
-    restoredQuantity: '5 kg',
-    currentStock: '2 kg',
-  },
-  {
-    item: 'Tomato Sauce',
-    restoredDate: 'Apr 10, 2025',
-    restoredQuantity: '25 L',
-    currentStock: '10 L',
-  },
-  {
-    item: 'Pasta',
-    restoredDate: 'Apr 09, 2025',
-    restoredQuantity: '50 kg',
-    currentStock: '22 kg',
-  },
-  {
-    item: 'Parmesan',
-    restoredDate: 'Apr 08, 2025',
-    restoredQuantity: '10 kg',
-    currentStock: '4 kg',
-  },
-  {
-    item: 'White Wine',
-    restoredDate: 'Apr 07, 2025',
-    restoredQuantity: '18 kg',
-    currentStock: '7 kg',
-  },
-  {
-    item: 'Tiramisu Mix',
-    restoredDate: 'Apr 06, 2025',
-    restoredQuantity: '6 kg',
-    currentStock: '3 kg',
-  },
-];
 // Helper function to parse date from the restored string
 const parseInventoryDate = (restoredStr) => {
   const dateStr = restoredStr.split(' ')[0] + ' ' + restoredStr.split(' ')[1] + ' ' + restoredStr.split(' ')[2];
@@ -759,7 +697,43 @@ export default function RestaurantHistory() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
   const [filteredFinishedOrders, setFilteredFinishedOrders] = useState([]);
+  const [inventoryData, setInventoryData] = useState([]);
 
+
+    // Fetch inventory history from backend
+    useEffect(() => {
+      const fetchInventoryHistory = async () => {
+        try {
+          const response = await fetch('http://localhost:3000/api/inventoryHistory'); // Adjust the URL as per your backend API endpoint
+          if (!response.ok) {
+            throw new Error('Failed to fetch inventory history');
+          }
+          const data = await response.json();
+          setInventoryData(data); // Set the inventory data to the state
+        } catch (error) {
+          console.error('Error fetching inventory history:', error);
+        }
+      };
+      
+      fetchInventoryHistory();
+    }, []); // Empty dependency array ensures this runs only once after the component mounts
+  
+    // Filter inventory data based on search term and selected date
+    const filteredInventory = inventoryData.filter(entry => {
+      const matchesSearch = entry.item_name.toLowerCase().includes(searchTerm.toLowerCase());
+    
+      // If no date is selected, filter only by the search term
+      if (!selectedDate) return matchesSearch;
+    
+      // Parse the restock_time string into a Date object
+      const restockDate = new Date(entry.restock_time);
+    
+      // Format the restockDate to match the 'yyyy-mm-dd' format (same as selectedDate)
+      const inventoryDate = restockDate.toISOString().split('T')[0]; // Extract the date part (yyyy-mm-dd)
+    
+      // Compare the extracted date with selectedDate
+      return inventoryDate === selectedDate && matchesSearch;
+    });
 
   useEffect(() => {
     socket.on("orderUpdate", (data) => {
@@ -791,7 +765,8 @@ export default function RestaurantHistory() {
         // Check if searching by order ID (starts with #)
         if (searchTermLower.startsWith('#')) {
           const searchId = searchTermLower.substring(1);
-          const matchesOrderId = order.order_id.toString().includes(searchId);
+          const matchesOrderId = (order.order_id ?? '').toString().includes(searchId);
+
           
           if (!selectedDate) return matchesOrderId;
           const orderDate = new Date(order.created_at).toISOString().split('T')[0];
@@ -806,7 +781,7 @@ export default function RestaurantHistory() {
             tableSearchTerm = searchTermLower.replace('table', '').trim();
           }
           
-          const tableNoStr = order.table_no.toString().toLowerCase();
+          const tableNoStr = (order.table_no ?? '').toString().toLowerCase();
           const matchesTableNo = 
             tableNoStr.includes(tableSearchTerm) ||
             tableNoStr.padStart(2, '0').includes(tableSearchTerm);
@@ -817,7 +792,8 @@ export default function RestaurantHistory() {
         }
   
         // General search (items, table no, or order id)
-        const tableNoStr = order.table_no.toString().toLowerCase();
+        const tableNoStr = (order.table_no ?? '').toString().toLowerCase();
+
         const matchesTableNo = 
           tableNoStr.includes(searchTermLower) ||
           `table ${tableNoStr}`.includes(searchTermLower) ||
@@ -895,15 +871,15 @@ export default function RestaurantHistory() {
   };
 
   
-  const filteredInventory = mockInventory.filter(entry => {
-    const matchesSearch = entry.item.toLowerCase().includes(searchTerm.toLowerCase());
+
+  //   const matchesSearch = entry.item.toLowerCase().includes(searchTerm.toLowerCase());
   
-    if (!selectedDate) return matchesSearch;
+  //   if (!selectedDate) return matchesSearch;
   
-    const inventoryDate = parseInventoryDate(entry.restoredDate); // ✅ correct key
-    const matchesDate = inventoryDate === selectedDate;
-    return matchesDate && matchesSearch;
-  });
+  //   const inventoryDate = parseInventoryDate(entry.restoredDate); // ✅ correct key
+  //   const matchesDate = inventoryDate === selectedDate;
+  //   return matchesDate && matchesSearch;
+  // });
 
   return (
     <div className="restaurant-history-container">
@@ -1045,47 +1021,41 @@ export default function RestaurantHistory() {
             </div>
           )}
         </div>
-      ) : (
+      ) :
+       (
      
         <div className="table-wrapper">
-        {filteredInventory.length > 0 ? (
-          <table className="orders-table">
-      <thead>
-<tr>
-  <th>ITEM</th>
-  <th>OLD STOCK</th>
-  <th>RESTORED</th>
-  <th>CURRENT STOCK</th>
-</tr>
-</thead>
-<tbody>
-{filteredInventory.map((entry, idx) => {
-  const unit = entry.currentStock.match(/[a-zA-Z]+/)[0];
-  const currentVal = parseFloat(entry.currentStock);
-  const restoredVal = parseFloat(entry.restoredQuantity);
-  const oldVal = (currentVal + restoredVal).toFixed(2);
-
-  return (
-    <tr key={idx}>
-      <td style={{ fontWeight: "bold" }}>{entry.item}</td>
-      <td>{entry.currentStock}</td>
-      <td>{entry.restoredDate} (+{entry.restoredQuantity})</td>
-      <td>{oldVal} {unit}</td>
-    </tr>
-  );
-})}
-</tbody>
-
-          </table>
-        ) : (
-          <div className="no-data-message">
-            {selectedDate 
-              ? "No inventory updates found for the selected date and search criteria."
-              : "No inventory updates found matching your search criteria."}
-          </div>
-        )}
+        <table className="orders-table">
+          <thead>
+            <tr>
+              <th>ITEM NAME</th>
+              <th>OLD STOCK</th>
+              <th>RESTORED</th>
+              <th>CURRENT STOCK</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredInventory.length > 0 ? (
+              filteredInventory.map((entry, index) => (
+                <tr key={index}>
+                  <td>{entry.item_name}</td>
+                  <td>{entry.old_stock}{entry.unit}</td>
+                  <td>{entry.restock_time}    ({entry.added_stock}{entry.unit})</td>
+                  <td>{entry.current_stock}{entry.unit}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" className="no-records">
+                  {inventoryData.length === 0 ? 'No inventory history available' : 'No matching inventory found'}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
-      )}
+      )
+      }
       {isModalOpen && (
         <Modal
           data={modalData}
@@ -1096,7 +1066,6 @@ export default function RestaurantHistory() {
     </div>
   );
 }
-
 
 
 
