@@ -750,74 +750,70 @@ export default function RestaurantHistory() {
   }, []);
 
 // Filter orders based on search term and selected date
-  useEffect(() => {
-    if (finishedOrders.length > 0) {
-      const filtered = finishedOrders.filter(order => {
-        const searchTermLower = searchTerm.toLowerCase().trim();
-        
-        // If empty search, only apply date filter if selected
-        // if (!searchTermLower) {
-        //   if (!selectedDate) return true;
-        //   const orderDate = new Date(order.created_at).toISOString().split('T')[0];
-        //   return orderDate === selectedDate;
-        // }
-  
-        // Check if searching by order ID (starts with #)
-        if (searchTermLower.startsWith('#')) {
-          const searchId = searchTermLower.substring(1);
-          const matchesOrderId = (order.order_id ?? '').toString().includes(searchId);
+useEffect(() => {
+  if (finishedOrders.length > 0) {
+    const filtered = finishedOrders.filter(order => {
+      const searchTermLower = searchTerm.toLowerCase().trim();
+      const tableNumbers = order.table_no != null
+        ? [order.table_no.toString()]
+        : Array.isArray(order.merged_table?.tables)
+          ? order.merged_table.tables.map(t => t.toString())
+          : [];
 
-          
-          if (!selectedDate) return matchesOrderId;
-          const orderDate = new Date(order.created_at).toISOString().split('T')[0];
-          return matchesOrderId && (orderDate === selectedDate);
-        }
-  
-        // Check if searching by table number (starts with "table" or is numeric)
-        const isTableSearch = searchTermLower.startsWith('table') || /^\d+$/.test(searchTermLower);
-        if (isTableSearch) {
-          let tableSearchTerm = searchTermLower;
-          if (searchTermLower.startsWith('table')) {
-            tableSearchTerm = searchTermLower.replace('table', '').trim();
-          }
-          
-          const tableNoStr = (order.table_no ?? '').toString().toLowerCase();
-          const matchesTableNo = 
-            tableNoStr.includes(tableSearchTerm) ||
-            tableNoStr.padStart(2, '0').includes(tableSearchTerm);
-  
-          if (!selectedDate) return matchesTableNo;
-          const orderDate = new Date(order.created_at).toISOString().split('T')[0];
-          return matchesTableNo && (orderDate === selectedDate);
-        }
-  
-        // General search (items, table no, or order id)
-        const tableNoStr = (order.table_no ?? '').toString().toLowerCase();
+      const joinedTableStr = tableNumbers.join(',').toLowerCase();
 
-        const matchesTableNo = 
-          tableNoStr.includes(searchTermLower) ||
-          `table ${tableNoStr}`.includes(searchTermLower) ||
-          tableNoStr.padStart(2, '0').includes(searchTermLower);
-  
-        const matchesOrderId = order.order_id.toString().includes(searchTermLower);
-  
-        const matchesItemNames = order.order_items.some(item => 
-          item.order_details.some(detail => 
-            detail.dish_name.toLowerCase().includes(searchTermLower)
-          )
-        );
-  
-        const matchesSearch = matchesTableNo || matchesOrderId || matchesItemNames;
-        
-        if (!selectedDate) return matchesSearch;
-        
+      // If searching by order ID (starts with #)
+      if (searchTermLower.startsWith('#')) {
+        const searchId = searchTermLower.substring(1);
+        const matchesOrderId = (order.order_id ?? '').toString().includes(searchId);
+
+        if (!selectedDate) return matchesOrderId;
         const orderDate = new Date(order.created_at).toISOString().split('T')[0];
-        return matchesSearch && (orderDate === selectedDate);
-      });
-      
-      setFilteredFinishedOrders(filtered);
-    }
-  }, [searchTerm, finishedOrders]);
+        return matchesOrderId && (orderDate === selectedDate);
+      }
+
+      // Check if searching by table number (starts with "table" or is numeric)
+      const isTableSearch = searchTermLower.startsWith('table') || /^\d+$/.test(searchTermLower);
+      if (isTableSearch) {
+        let tableSearchTerm = searchTermLower;
+        if (searchTermLower.startsWith('table')) {
+          tableSearchTerm = searchTermLower.replace('table', '').trim();
+        }
+
+        const matchesTableNo = tableNumbers.some(no =>
+          no.includes(tableSearchTerm) || no.padStart(2, '0').includes(tableSearchTerm)
+        );
+
+        if (!selectedDate) return matchesTableNo;
+        const orderDate = new Date(order.created_at).toISOString().split('T')[0];
+        return matchesTableNo && (orderDate === selectedDate);
+      }
+
+      // General search (items, table no, or order id)
+      const matchesTableNo = joinedTableStr.includes(searchTermLower) ||
+        `table ${joinedTableStr}`.includes(searchTermLower) ||
+        joinedTableStr.padStart(2, '0').includes(searchTermLower);
+
+      const matchesOrderId = order.order_id.toString().includes(searchTermLower);
+
+      const matchesItemNames = order.order_items.some(item =>
+        item.order_details.some(detail =>
+          detail.dish_name.toLowerCase().includes(searchTermLower)
+        )
+      );
+
+      const matchesSearch = matchesTableNo || matchesOrderId || matchesItemNames;
+
+      if (!selectedDate) return matchesSearch;
+
+      const orderDate = new Date(order.created_at).toISOString().split('T')[0];
+      return matchesSearch && (orderDate === selectedDate);
+    });
+
+    setFilteredFinishedOrders(filtered);
+  }
+}, [searchTerm, finishedOrders, selectedDate]);
+
 
   const formatDateTime = (dateString) => {
     if (!dateString) return 'N/A';

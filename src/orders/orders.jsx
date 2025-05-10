@@ -393,10 +393,16 @@ const Orders = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [isAddItemModalOpen, setIsAddItemModalOpen] = useState();
+   const [isDiscountModalOpen, setIsDiscountModalOpen] = useState();
   const [dishes, setDishes] = useState([]); //new changes
   const [selectedDish, setSelectedDish] = useState("");//new changes
   const [quantity, setQuantity] = useState("");//new changes
   const [filter, setFilter] = useState("all"); // 'all', 'new', 'preparing', 'finished'
+  {/* new changes */}
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [discountType, setDiscountType] = useState("percentage"); // 'percentage' or 'fixed'
+  const [Total, setTotal] = useState(0);
+ const [discountOrderId, setDiscountOrderId] = useState(null);
 
   const filterOptions = [
     { value: "all", label: "All Status"},
@@ -404,6 +410,64 @@ const Orders = () => {
     { value: "preparing", label: "Preparing Orders" },
     { value: "finished", label: "Finished Orders" }
   ];
+  {/* new changes */}
+const calculateDiscountedTotal = (total, type, amount) => {
+  let finalTotal = parseFloat(total);
+
+  if (isNaN(finalTotal) || isNaN(amount)) return total;
+
+  if (type === "percentage") {
+    finalTotal -= (finalTotal * amount) / 100;
+  } else if (type === "fixed") {
+    finalTotal -= amount;
+  }
+
+  return finalTotal < 0 ? 0 : finalTotal.toFixed(2); // Prevent negative total
+};
+{/* new changes */}
+const handleApplyDiscount = async (e) => {
+  e.preventDefault()
+
+  // 1. calculate locally
+  const newTotal = calculateDiscountedTotal(
+    totalBill,
+    discountType,
+    discountAmount
+  )
+  console.log("New Total after Discount:", newTotal)
+
+  try {
+    // 2. persist via API
+    const res = await fetch(`http://localhost:3000/api/order-update/${discountOrderId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ total: newTotal }),
+    })
+
+    if (!res.ok) {
+      throw new Error(`Server returned ${res.status}`)
+    }
+
+    // 3. update UI from server response
+   await res.json();
+setTotal(newTotal.toString());
+  // keep it a string if your input is text
+    setIsDiscountModalOpen(false)
+  } catch (err) {
+    console.error("Failed to save discounted total:", err)
+    // you might show an error toast here
+  }
+}
+
+// const handleApplyDiscount = (e) => {
+//   e.preventDefault(); // Prevent page reload
+//   const newTotal = calculateDiscountedTotal(totalBill, discountType, discountAmount);
+//     console.log("New Total after Discount:", newTotal); // ✅ Log the result
+//   setTotal(newTotal); // Update the total with discounted value
+  
+//   setIsDiscountModalOpen(false); // Close modal
+  
+// };
 
   // Get orders based on filter
   const getFilteredOrders = () => {
@@ -445,7 +509,7 @@ const Orders = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("https://eatopae-backend-trials.onrender.com/api/menu");
+        const response = await fetch("http://localhost:3000/api/menu");
         const data = await response.json();
   
         // Include ALL necessary dish properties
@@ -837,6 +901,7 @@ const Orders = () => {
 
       {/* new changes */}
     { orderStatus == 1  && <button style={{float:"right", backgroundColor:"none", color:"green",border:"none"}} onClick={() => { editOrder() } } > { editOrderStatus ? `Save` : `Edit Order` } </button>}
+  
 
     {/* new changes */}
     { orderStatus == 1  && <button style={{float:"right", backgroundColor:"none", color:"red",border:"none",marginRight:'15px'}} onClick={() => { addItem() } } >Add Item</button>} 
@@ -849,6 +914,7 @@ const Orders = () => {
         <div className="table-info">
           <p>Table {item.table_no}</p>
           <p>#{item.order_id}</p>
+     
         </div>
       </div>
 
@@ -862,10 +928,58 @@ const Orders = () => {
                 {detail.notes && <p className="notes">{detail.notes}</p>}
                 <p className="quantity-price"> x{detail.quantity} </p>
                 <p> ₹{detail.dish_cost} = ₹{gettotalcost(detail)}
+                  
                 </p>
               </div>
             ))}
+            {/* new changes */}
+     {isDiscountModalOpen && (
+  <div className="order-form-container">
+    <button
+      type="button"
+      onClick={() => setIsDiscountModalOpen(false)}
+      style={{ border: "none", color: "grey", fontWeight: "bold" }}
+    >
+      X
+    </button>
+
+    <form onSubmit={handleApplyDiscount}>
+      <input
+        type="text"
+        value={totalBill}
+        onChange={(e) => setTotal(e.target.value)}
+      />
+
+      <select
+        value={discountType}
+        onChange={(e) => setDiscountType(e.target.value)}
+        className="discount-type-select"
+      >
+        <option value="percentage">Percentage</option>
+        <option value="fixed">Fixed Amount</option>
+      </select>
+
+      <input
+        type="number"
+        placeholder={discountType === "percentage" ? "Discount %" : "Discount Amount"}
+        value={discountAmount === "" || isNaN(discountAmount) ? "" : discountAmount}
+        onChange={(e) => {
+          const value = e.target.value;
+          setDiscountAmount(value === "" ? "" : parseFloat(value));
+        }}
+        min="0"
+        max={discountType === "percentage" ? "100" : "10000"}
+      />
+
+      <br />
+      <button type="submit">Apply</button>
+    </form>
+  </div>
+)}
+
+             
           </div>
+       
         ))}
       </div>
       }
@@ -886,6 +1000,7 @@ const Orders = () => {
                   <button style={{cursor:"pointer",background:"none", border:"none",fontSize:"35px",color:"grey",marginLeft:"20px"}} onClick={ () => { handleIncrease(detail.dish_id) }} > + </button> 
                   </p>
                   <p> ₹{detail.dish_cost} = ₹{gettotalcost(detail)}
+                    
                   </p>
                 </div>
               ))}
@@ -899,13 +1014,16 @@ const Orders = () => {
           <p className="dish-name" >Total</p>
           <p> x{totalItem} </p>
           <p> &nbsp; &nbsp; &nbsp; ₹{totalBill}</p>
+          
         </div>
         <div className="order-btn">
         { orderStatus == 0 && <button className="btn-print" onClick={() => { acceptAction(item),orderPrint(item)}}>
          Accept and Print
         </button>}
         { orderStatus == 1 && !editOrderStatus && <button className="btn-print" onClick={() => { confirmAction(item) } } > Order Completed </button>}
-   
+        {/* new changes */}
+          { orderStatus == 1  && <button style={{float:"right", backgroundColor:"none", color:"green",border:"none"}}onClick={ ()=>{setIsDiscountModalOpen(true),setDiscountOrderId(item.order_id);  } } >Apply Discount</button>}
+   {/* ...................................... */}
         { orderStatus == 2 && <button 
                 onClick={() =>{billPrint(item)}}
                 disabled={loading} 
@@ -913,7 +1031,7 @@ const Orders = () => {
             >
                 {loading ? "Processing..." : "Print Bill"}
             </button>}
-            {message && <p>{message}</p>}
+            {/* {message && <p>{message}</p>} */}
         </div>
       </div>
     </div>    

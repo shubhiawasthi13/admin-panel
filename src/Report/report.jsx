@@ -316,6 +316,17 @@ import { FaDownload, FaSearch } from 'react-icons/fa';
 
 const sampleData = [
   {
+    tableNo: '22',
+    time: 'Apr 16, 2025 - 10:23 AM',
+    item: 'Chocolate Mousse',
+    quantity: '4',
+    originalTotal: 1200,
+    price: 200,
+    discount: 0,
+    changeType: 'increase',
+    remarks: 'Item quantity manually updated',
+  },
+  {
     tableNo: '14',
     time: 'Apr 17, 2025 - 11:23 AM',
     item: 'Grilled Salmon',
@@ -343,17 +354,7 @@ const sampleData = [
     originalTotal: 2000,
     remarks: 'Tables combined as one',
   },
-  {
-    tableNo: '22',
-    time: 'Apr 16, 2025 - 10:23 AM',
-    item: 'Chocolate Mousse',
-    quantity: '4',
-    originalTotal: 1200,
-    price: 200,
-    discount: 0,
-    changeType: 'increase',
-    remarks: 'Item quantity manually updated',
-  },
+ 
   {
     tableNo: '8',
     time: 'Apr 17, 2025 - 12:23 AM',
