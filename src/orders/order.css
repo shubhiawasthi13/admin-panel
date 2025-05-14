@@ -150,6 +150,18 @@ h1 {
   width: 100%;
 }
 
+.btn-printt {
+  background-color: #ffc107;
+  color: #fff;
+  border: none;
+  margin: 0 5px 0 5px;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  width: 70%;
+}
+
 .accept-print:hover {
   background-color: #e0a800;
 }

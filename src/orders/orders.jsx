@@ -401,8 +401,10 @@ const Orders = () => {
   {/* new changes */}
   const [discountAmount, setDiscountAmount] = useState(0);
   const [discountType, setDiscountType] = useState("percentage"); // 'percentage' or 'fixed'
-  const [Total, setTotal] = useState(0);
- const [discountOrderId, setDiscountOrderId] = useState(null);
+  const [total, setTotal] = useState();
+ const [OrderId, setOrderId] = useState(null);
+  const [resId, setResId] = useState(null);
+  
 
   const filterOptions = [
     { value: "all", label: "All Status"},
@@ -424,40 +426,81 @@ const calculateDiscountedTotal = (total, type, amount) => {
 
   return finalTotal < 0 ? 0 : finalTotal.toFixed(2); // Prevent negative total
 };
+
 {/* new changes */}
 const handleApplyDiscount = async (e) => {
-  e.preventDefault()
+  e.preventDefault();
 
-  // 1. calculate locally
   const newTotal = calculateDiscountedTotal(
-    totalBill,
+    total,
     discountType,
     discountAmount
-  )
-  console.log("New Total after Discount:", newTotal)
+  );
 
   try {
-    // 2. persist via API
-    const res = await fetch(`http://localhost:3000/api/order-update/${discountOrderId}`, {
+    const res = await fetch(`http://localhost:3000/api/order-update/${OrderId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ total: newTotal }),
-    })
+    });
 
     if (!res.ok) {
-      throw new Error(`Server returned ${res.status}`)
+      throw new Error(`Server returned ${res.status}`);
     }
 
-    // 3. update UI from server response
-   await res.json();
-setTotal(newTotal.toString());
-  // keep it a string if your input is text
-    setIsDiscountModalOpen(false)
+    await res.json();
+
+    // Update both total and filteredItems state
+    setTotal(newTotal.toString());
+
+    // Update the correct order object locally to reflect change in UI
+    setFilteredItems((prev) => {
+      const updated = [...prev];
+      if (updated[0]) {
+        updated[0].total = newTotal.toString(); // or Number
+      }
+      return updated;
+    });
+
+    setIsDiscountModalOpen(false);
   } catch (err) {
-    console.error("Failed to save discounted total:", err)
-    // you might show an error toast here
+    console.error("Failed to save discounted total:", err);
   }
-}
+};
+
+// const handleApplyDiscount = async (e) => {
+//   e.preventDefault()
+
+//   // 1. calculate locally
+//   const newTotal = calculateDiscountedTotal(
+//     total,
+//     discountType,
+//     discountAmount
+//   )
+//   console.log("New Total after Discount:", newTotal)
+
+//   try {
+//     // 2. persist via API
+//     const res = await fetch(`http://localhost:3000/api/order-update/${OrderId}`, {
+//       method: 'PUT',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify({ total: newTotal }),
+//     })
+
+//     if (!res.ok) {
+//       throw new Error(`Server returned ${res.status}`)
+//     }
+
+//     // 3. update UI from server response
+//    await res.json();
+// setTotal(newTotal.toString());
+//   // keep it a string if your input is text
+//     setIsDiscountModalOpen(false)
+//   } catch (err) {
+//     console.error("Failed to save discounted total:", err)
+//     // you might show an error toast here
+//   }
+// }
 
 // const handleApplyDiscount = (e) => {
 //   e.preventDefault(); // Prevent page reload
@@ -484,20 +527,82 @@ setTotal(newTotal.toString());
   };
   //new changes
   const handleQuantityChange = (e) => {
-    setQuantity(e.target.value);
+   setQuantity(Number(e.target.value));
   };
+
 //new changes
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!selectedDish || quantity < 1) {
-      alert("Please select a dish and enter a valid quantity.");
-      return;
-    }
-    console.log("Order Added:", { dish: selectedDish.label, quantity });
-    alert("item added successfully");
-    setSelectedDish("");
-    setQuantity("");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const itemData = {
+    restaurant_id: resId,
+    new_items: [
+      {
+        dish_id: selectedDish.value,
+        quantity: quantity,
+        dish_cost: selectedDish.price,
+        dish_name: selectedDish.label,
+      }
+    ]
   };
+
+  setFilteredItems((prev) => {
+    const updated = [...prev];
+    const currentOrder = { ...updated[0] };
+
+    const newItem = itemData.new_items[0];
+
+    const existingItemIndex = currentOrder.order_details.findIndex(
+      (item) => item.dish_id === newItem.dish_id
+    );
+
+    if (existingItemIndex !== -1) {
+      // Update quantity of existing item
+      const existingItem = currentOrder.order_details[existingItemIndex];
+      currentOrder.order_details[existingItemIndex] = {
+        ...existingItem,
+        quantity: existingItem.quantity + newItem.quantity,
+      };
+    } else {
+      // Add new item
+      currentOrder.order_details.push(newItem);
+    }
+
+    // 🟡 Calculate updated total
+    const updatedTotal = currentOrder.order_details.reduce(
+      (acc, item) => acc + item.dish_cost * item.quantity,
+      0
+    );
+    currentOrder.total = updatedTotal;
+
+    // 🟡 Update the total in component state
+    setTotal(updatedTotal);
+
+    updated[0] = currentOrder;
+    return updated;
+  });
+
+  try {
+    const response = await fetch(`http://localhost:3000/api/add-items/${OrderId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(itemData),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to add item");
+    }
+
+    setIsAddItemModalOpen(false);
+    alert("Item added successfully!");
+  } catch (error) {
+    console.error("Error adding item:", error);
+    alert("An error occurred while adding the item. Please try again.");
+  }
+};
+
   
 
 
@@ -570,12 +675,15 @@ setTotal(newTotal.toString());
   let [orderStatus,setOrderStatus] = useState(0);
 
   let [editOrderStatus,setEditOrdersSatatus] = useState(false);
+  
 
   const handleSlectedTable = (item, orderStatus ) =>{
 
   //   Filter order items based on the requested status
     const tempItems = item.order_items.filter(
-      (item) => item.order_status === orderStatus
+      (item) => item.order_status === orderStatus,
+      
+
     );
     setItem(item);
     setFilteredItems( tempItems );
@@ -675,6 +783,8 @@ setTotal(newTotal.toString());
     return cost;
   }
 
+ 
+
   const editOrder = async() =>{
     setEditOrdersSatatus(!editOrderStatus);
     
@@ -687,6 +797,7 @@ setTotal(newTotal.toString());
           }
         );
         const responseData = response.data;
+     
         console.log("Order Response:", responseData);
       } catch (error) {
         console.error("Error Editing order:", error);
@@ -868,10 +979,27 @@ setTotal(newTotal.toString());
         onChange={setSelectedDish}
         placeholder="Item name..."
         isSearchable
+        
       />
       <br />
       {selectedDish && <p>You selected: {selectedDish.label}</p>}
-      
+      <input
+        type="text"
+        name="id"
+        placeholder="dish id"
+        min={1}
+        value={selectedDish? selectedDish.value : ""}
+        className="order-input"
+      />
+      <br />
+        <input
+        type="text"
+        name="price"
+        placeholder="price"
+        min={1}
+        value={selectedDish? selectedDish.price :""}
+        className="order-input"
+      />
       <input
         type="number"
         name="quantity"
@@ -882,6 +1010,7 @@ setTotal(newTotal.toString());
         className="order-input"
       />
       <br />
+      
       
       <button type="submit" className="submit-button">
         Add
@@ -904,7 +1033,7 @@ setTotal(newTotal.toString());
   
 
     {/* new changes */}
-    { orderStatus == 1  && <button style={{float:"right", backgroundColor:"none", color:"red",border:"none",marginRight:'15px'}} onClick={() => { addItem() } } >Add Item</button>} 
+    { orderStatus == 1  && <button style={{float:"right", backgroundColor:"none", color:"red",border:"none",marginRight:'15px'}} onClick={() => { addItem(),setOrderId(item.order_id),setResId(item.restaurant_id) } } >Add Item</button>} 
 
       <div className="header mt-5">
         <div className="details">
@@ -930,8 +1059,15 @@ setTotal(newTotal.toString());
                 <p> ₹{detail.dish_cost} = ₹{gettotalcost(detail)}
                   
                 </p>
+                
+           
               </div>
+              
             ))}
+         
+            {/* <p>Discount Total: { item.total< totalBill?  item.total : 0}</p> */}
+
+                        
             {/* new changes */}
      {isDiscountModalOpen && (
   <div className="order-form-container">
@@ -946,8 +1082,10 @@ setTotal(newTotal.toString());
     <form onSubmit={handleApplyDiscount}>
       <input
         type="text"
-        value={totalBill}
+  value={total}
         onChange={(e) => setTotal(e.target.value)}
+       
+        
       />
 
       <select
@@ -977,7 +1115,7 @@ setTotal(newTotal.toString());
   </div>
 )}
 
-             
+                 { orderStatus == 1  && !editOrderStatus &&  <button style={{position:'absolute', right:"20px", bottom:"20px",backgroundColor:"green", color:"white",border:"none",padding:"10px 20px"}}onClick={ ()=>{setIsDiscountModalOpen(true),setOrderId(item.order_id),setTotal(item.total);  } } >Apply Discount</button>}
           </div>
        
         ))}
@@ -1013,16 +1151,19 @@ setTotal(newTotal.toString());
         <div className="total">
           <p className="dish-name" >Total</p>
           <p> x{totalItem} </p>
-          <p> &nbsp; &nbsp; &nbsp; ₹{totalBill}</p>
+          <p> &nbsp; &nbsp; &nbsp; ₹{totalBill}</p><br />
           
         </div>
+   
         <div className="order-btn">
         { orderStatus == 0 && <button className="btn-print" onClick={() => { acceptAction(item),orderPrint(item)}}>
          Accept and Print
         </button>}
-        { orderStatus == 1 && !editOrderStatus && <button className="btn-print" onClick={() => { confirmAction(item) } } > Order Completed </button>}
-        {/* new changes */}
-          { orderStatus == 1  && <button style={{float:"right", backgroundColor:"none", color:"green",border:"none"}}onClick={ ()=>{setIsDiscountModalOpen(true),setDiscountOrderId(item.order_id);  } } >Apply Discount</button>}
+        { orderStatus == 1 && !editOrderStatus && <button className="btn-printt"  onClick={() => { confirmAction(item) } } > Order Completed </button>}
+
+       
+          
+           {/* { orderStatus == 1  && <button style={{float:"right", backgroundColor:"none", color:"red",border:"none",marginRight:'15px'}} onClick={() => { addItem(),setDiscountOrderId(item.order_id),setResId(item.restaurant_id) } } >Add Item</button>}  */}
    {/* ...................................... */}
         { orderStatus == 2 && <button 
                 onClick={() =>{billPrint(item)}}
