@@ -398,7 +398,7 @@ const Orders = () => {
   const [selectedDish, setSelectedDish] = useState("");//new changes
   const [quantity, setQuantity] = useState("");//new changes
   const [filter, setFilter] = useState("all"); // 'all', 'new', 'preparing', 'finished'
-  {/* new changes */}
+  {/* latest changes */}
   const [discountAmount, setDiscountAmount] = useState(0);
   const [discountType, setDiscountType] = useState("percentage"); // 'percentage' or 'fixed'
   const [total, setTotal] = useState();
@@ -412,7 +412,7 @@ const Orders = () => {
     { value: "preparing", label: "Preparing Orders" },
     { value: "finished", label: "Finished Orders" }
   ];
-  {/* new changes */}
+  {/* latest changes */}
 const calculateDiscountedTotal = (total, type, amount) => {
   let finalTotal = parseFloat(total);
 
@@ -427,7 +427,7 @@ const calculateDiscountedTotal = (total, type, amount) => {
   return finalTotal < 0 ? 0 : finalTotal.toFixed(2); // Prevent negative total
 };
 
-{/* new changes */}
+{/* latest changes */}
 const handleApplyDiscount = async (e) => {
   e.preventDefault();
 
@@ -451,7 +451,9 @@ const handleApplyDiscount = async (e) => {
     await res.json();
 
     // Update both total and filteredItems state
+    
     setTotal(newTotal.toString());
+    setDiscountAmount("");
 
     // Update the correct order object locally to reflect change in UI
     setFilteredItems((prev) => {
@@ -468,49 +470,6 @@ const handleApplyDiscount = async (e) => {
   }
 };
 
-// const handleApplyDiscount = async (e) => {
-//   e.preventDefault()
-
-//   // 1. calculate locally
-//   const newTotal = calculateDiscountedTotal(
-//     total,
-//     discountType,
-//     discountAmount
-//   )
-//   console.log("New Total after Discount:", newTotal)
-
-//   try {
-//     // 2. persist via API
-//     const res = await fetch(`http://localhost:3000/api/order-update/${OrderId}`, {
-//       method: 'PUT',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify({ total: newTotal }),
-//     })
-
-//     if (!res.ok) {
-//       throw new Error(`Server returned ${res.status}`)
-//     }
-
-//     // 3. update UI from server response
-//    await res.json();
-// setTotal(newTotal.toString());
-//   // keep it a string if your input is text
-//     setIsDiscountModalOpen(false)
-//   } catch (err) {
-//     console.error("Failed to save discounted total:", err)
-//     // you might show an error toast here
-//   }
-// }
-
-// const handleApplyDiscount = (e) => {
-//   e.preventDefault(); // Prevent page reload
-//   const newTotal = calculateDiscountedTotal(totalBill, discountType, discountAmount);
-//     console.log("New Total after Discount:", newTotal); // ✅ Log the result
-//   setTotal(newTotal); // Update the total with discounted value
-  
-//   setIsDiscountModalOpen(false); // Close modal
-  
-// };
 
   // Get orders based on filter
   const getFilteredOrders = () => {
@@ -530,7 +489,7 @@ const handleApplyDiscount = async (e) => {
    setQuantity(Number(e.target.value));
   };
 
-//new changes
+{/* latest changes */}
 const handleSubmit = async (e) => {
   e.preventDefault();
 
@@ -596,6 +555,8 @@ const handleSubmit = async (e) => {
     }
 
     setIsAddItemModalOpen(false);
+    setSelectedDish("");
+    setQuantity("");
     alert("Item added successfully!");
   } catch (error) {
     console.error("Error adding item:", error);
@@ -784,7 +745,7 @@ const handleSubmit = async (e) => {
   }
 
  
-
+{/* latest changes */}
   const editOrder = async() =>{
     setEditOrdersSatatus(!editOrderStatus);
     
@@ -797,8 +758,20 @@ const handleSubmit = async (e) => {
           }
         );
         const responseData = response.data;
-     
+        
+  
+  setTotal(responseData.updatedOrder.total);
+setFilteredItems((prev) => {
+  const updated = [...prev];
+  if (updated[0]) {
+    updated[0].total = responseData.updatedOrder.total.toString();
+  }
+  return updated;
+});
+
         console.log("Order Response:", responseData);
+
+
       } catch (error) {
         console.error("Error Editing order:", error);
         alert("Failed to Edit order. Please try again.");
@@ -966,7 +939,7 @@ const handleSubmit = async (e) => {
 
 
 
-
+{/* latest changes */}
      {/* add item Modal */}
 {isAddItemModalOpen && (    
     <div className="order-form-container">
@@ -1029,10 +1002,12 @@ const handleSubmit = async (e) => {
      {orderStatus == 2 && <h4>Finished Orders</h4>}
 
       {/* new changes */}
-    { orderStatus == 1  && <button style={{float:"right", backgroundColor:"none", color:"green",border:"none"}} onClick={() => { editOrder() } } > { editOrderStatus ? `Save` : `Edit Order` } </button>}
+    { orderStatus == 1  && <button style={{float:"right", backgroundColor:"none", color:"green",border:"none"}} onClick={() => { editOrder()
+
+     } } > { editOrderStatus ? `Save` : `Edit Order` } </button>}
   
 
-    {/* new changes */}
+   {/* latest changes */}
     { orderStatus == 1  && <button style={{float:"right", backgroundColor:"none", color:"red",border:"none",marginRight:'15px'}} onClick={() => { addItem(),setOrderId(item.order_id),setResId(item.restaurant_id) } } >Add Item</button>} 
 
       <div className="header mt-5">
@@ -1064,11 +1039,11 @@ const handleSubmit = async (e) => {
               </div>
               
             ))}
-         
-            {/* <p>Discount Total: { item.total< totalBill?  item.total : 0}</p> */}
+         {/* latest changes */}
+            <p>Discount Total: { total< totalBill?  total : 0}</p>
 
                         
-            {/* new changes */}
+          {/* latest changes */}
      {isDiscountModalOpen && (
   <div className="order-form-container">
     <button
@@ -1114,7 +1089,7 @@ const handleSubmit = async (e) => {
     </form>
   </div>
 )}
-
+                     {/* latest changes */}
                  { orderStatus == 1  && !editOrderStatus &&  <button style={{position:'absolute', right:"20px", bottom:"20px",backgroundColor:"green", color:"white",border:"none",padding:"10px 20px"}}onClick={ ()=>{setIsDiscountModalOpen(true),setOrderId(item.order_id),setTotal(item.total);  } } >Apply Discount</button>}
           </div>
        
@@ -1159,11 +1134,11 @@ const handleSubmit = async (e) => {
         { orderStatus == 0 && <button className="btn-print" onClick={() => { acceptAction(item),orderPrint(item)}}>
          Accept and Print
         </button>}
+        {/* latest changes */}
         { orderStatus == 1 && !editOrderStatus && <button className="btn-printt"  onClick={() => { confirmAction(item) } } > Order Completed </button>}
 
        
           
-           {/* { orderStatus == 1  && <button style={{float:"right", backgroundColor:"none", color:"red",border:"none",marginRight:'15px'}} onClick={() => { addItem(),setDiscountOrderId(item.order_id),setResId(item.restaurant_id) } } >Add Item</button>}  */}
    {/* ...................................... */}
         { orderStatus == 2 && <button 
                 onClick={() =>{billPrint(item)}}
