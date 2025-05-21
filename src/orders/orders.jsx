@@ -636,6 +636,8 @@ const handleSubmit = async (e) => {
   let [orderStatus,setOrderStatus] = useState(0);
 
   let [editOrderStatus,setEditOrdersSatatus] = useState(false);
+    {/* latest changes */}
+  let [deleteOrder,setDeleteOrder] = useState(false)
   
 
   const handleSlectedTable = (item, orderStatus ) =>{
@@ -687,13 +689,60 @@ const handleSubmit = async (e) => {
     setFilteredItems( [...filteredItems] );
   };
 
-  const handleDelete = (id) => {
-    const userResponse = window.confirm("Are you sure you want to delete this?");
-    if (userResponse){
-      filteredItems[0].order_details = filteredItems[0].order_details.filter( (item) => item.dish_id != id  ) 
-      setFilteredItems( [...filteredItems] );
+  // const handleDelete = (id) => {
+  //   const userResponse = window.confirm("Are you sure you want to delete this?");
+  //   if (userResponse){
+  //     filteredItems[0].order_details = filteredItems[0].order_details.filter( (item) => item.dish_id != id  ) 
+  //     setFilteredItems( [...filteredItems] );
+  //   }
+  // };
+
+  // latest changes
+  const handleDelete = async (orderId, dishId) => {
+    setDeleteOrder(!deleteOrder);
+    if(deleteOrder){
+       try {
+    // const userResponse = window.confirm("Are you sure you want to delete this?");
+    // if (!userResponse) return;
+
+    const response = await fetch(`http://localhost:3000/api/del-orders/${orderId}/item/${dishId}`, {
+      method: 'DELETE',
+    });
+
+    if (response.ok) {
+      // Update the UI immediately by removing the deleted item from filteredItems
+      setFilteredItems(prevItems => {
+        const updatedItems = [...prevItems];
+        if (updatedItems[0]) {
+          updatedItems[0].order_details = updatedItems[0].order_details.filter(
+            item => item.dish_id !== dishId
+          );
+          
+          // Recalculate the total after deletion
+          const newTotal = updatedItems[0].order_details.reduce(
+            (sum, item) => sum + (item.dish_cost * item.quantity),
+            0
+          );
+          
+          // Update the total in both local state and filteredItems
+          setTotal(newTotal);
+          updatedItems[0].total = newTotal.toString();
+        }
+        return updatedItems;
+      });
+
+      alert("Item deleted successfully");
+    } else {
+      console.error("Failed to delete item");
+      
     }
-  };
+  } catch (err) {
+    console.error("Error deleting item:", err);
+    alert("Error deleting item");
+  }
+    }
+ 
+};
 
   const acceptAction = (item) =>{
 
@@ -1005,10 +1054,15 @@ setFilteredItems((prev) => {
     { orderStatus == 1  && <button style={{float:"right", backgroundColor:"none", color:"green",border:"none"}} onClick={() => { editOrder()
 
      } } > { editOrderStatus ? `Save` : `Edit Order` } </button>}
+       {/* latest changes */}
+       { orderStatus == 1  && <button style={{float:"right", backgroundColor:"none", color:"red",border:"none", marginRight:"15px"}} onClick={() => { handleDelete()
+
+     } } > { deleteOrder ? `Cancel` : `Delete Item` } </button>}
+  
   
 
    {/* latest changes */}
-    { orderStatus == 1  && <button style={{float:"right", backgroundColor:"none", color:"red",border:"none",marginRight:'15px'}} onClick={() => { addItem(),setOrderId(item.order_id),setResId(item.restaurant_id) } } >Add Item</button>} 
+    { orderStatus == 1  && <button style={{float:"right", backgroundColor:"none", color:"green",border:"none",marginRight:'15px'}} onClick={() => { addItem(),setOrderId(item.order_id),setResId(item.restaurant_id) } } >Add Item</button>} 
 
       <div className="header mt-5">
         <div className="details">
@@ -1021,8 +1075,8 @@ setFilteredItems((prev) => {
      
         </div>
       </div>
-
-      { !editOrderStatus &&
+  {/* latest changes */}
+      { !editOrderStatus && !deleteOrder &&
         <div className="order-items">
         {filteredItems.map((item, index) => (
           <div key={index} className="order-item">
@@ -1096,7 +1150,7 @@ setFilteredItems((prev) => {
         ))}
       </div>
       }
-
+  {/* latest changes */}
       { editOrderStatus && 
         <div className="editOrder order-items">
         {filteredItems.map((item, index) => (
@@ -1106,8 +1160,7 @@ setFilteredItems((prev) => {
                 <p className="dish-name">{detail.dish_name}</p>
                 {detail.notes && <p className="notes">{detail.notes}</p>}
                   <p className="quantity-price">
-                  <img src= {DelIcon} className="del" style={{cursor:"pointer"}} onClick={ () => { handleDelete(detail.dish_id) }} />
-                  &nbsp;
+                
                   <button style={{cursor:"pointer",fontSize:"50px",background:"none", border:"none",color:"grey"}} onClick={ () => { handleDecrease(detail.dish_id) }} disabled={detail.quantity === 1} > - </button>
                    &nbsp; <span style={{fontSize:"15px"}}>{detail.quantity} </span> 
                   <button style={{cursor:"pointer",background:"none", border:"none",fontSize:"35px",color:"grey",marginLeft:"20px"}} onClick={ () => { handleIncrease(detail.dish_id) }} > + </button> 
@@ -1121,6 +1174,34 @@ setFilteredItems((prev) => {
           ))}
         </div>
         }
+          {/* latest changes */}
+        { deleteOrder && 
+        <div className="editOrder order-items">
+        {filteredItems.map((item, index) => (
+          <div key={index} className="order-item">
+            {item.order_details.map((detail, i) => (
+              <div key={i} className="item-details">
+                <p className="dish-name">{detail.dish_name}</p>
+                {detail.notes && <p className="notes">{detail.notes}</p>}
+                  <p className="quantity-price">
+                    {/* latest changes */}
+                  <img src= {DelIcon} className="del" style={{cursor:"pointer"}} onClick={ () => { handleDelete(item.order_id, detail.dish_id) }} />
+                  &nbsp;
+                  {/* <button style={{cursor:"pointer",fontSize:"50px",background:"none", border:"none",color:"grey"}} onClick={ () => { handleDecrease(detail.dish_id) }} disabled={detail.quantity === 1} > - </button> */}
+                   &nbsp; <span style={{fontSize:"15px"}}>x{detail.quantity} </span> 
+                  {/* <button style={{cursor:"pointer",background:"none", border:"none",fontSize:"35px",color:"grey",marginLeft:"20px"}} onClick={ () => { handleIncrease(detail.dish_id) }} > + </button>  */}
+                  </p>
+                  <p> ₹{detail.dish_cost} = ₹{gettotalcost(detail)}
+                    
+                  </p>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+        }
+        
+        
 
       <div className="footer">
         <div className="total">
