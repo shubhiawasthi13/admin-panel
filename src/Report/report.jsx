@@ -195,49 +195,63 @@ const ReportPage = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredReports.length > 0 ? (
-                filteredReports.map((report) => (
-                  <tr key={report.id}>
-                    <td>{report.orderId}</td>
-                    <td>{report.tableNumber}</td>
-                    <td>{new Date(report.time).toLocaleString()}</td>
-                    <td>{report.originalTotal}</td>
-                    <td>
-                      <div style={{ whiteSpace: 'pre-wrap' }}>
-                        {report.edits.length > 0 && (
-                          <>
-                            <strong>Item:</strong> {report.edits[0].itemName} <br />
-                            <strong>Change:</strong> {report.edits[0].changeType} <br />
-                            <strong>Qty:</strong> {report.edits[0].changeQty} <br />
-                            <strong>Unit Price:</strong> ₹{report.edits[0].unitPrice} <br />
-                            <strong>Total:</strong> ₹{report.edits[0].total} <br />
-                          </>
-                        )}
-                        {report.edits.length > 1 && (
-                          <button
-                            onClick={() => openModal(report)}
-                            style={{
-                              border: 'none',
-                              textDecoration: 'underline',
-                              color: 'blue',
-                            }}
-                          >
-                            View All
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                    <td>{report.finalTotal}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" style={{ textAlign: 'center' }}>
-                    No reports found for the selected filters.
-                  </td>
-                </tr>
-              )}
-            </tbody>
+      {filteredReports.length > 0 ? (
+        filteredReports.map((report) => (
+          <tr key={report.id}>
+            <td>{report.orderId}</td>
+            <td>{report.tableNumber}</td>
+            <td>{new Date(report.time).toLocaleString()}</td>
+            <td>{report.originalTotal}</td>
+            <td>
+              <div style={{ whiteSpace: 'pre-wrap' }}>
+                {report.edits.length > 0 && (
+                  <>
+                    {report.edits[0].type === 'discount' ? (
+                      <>
+                        <strong>Discount Applied</strong><br />
+                        <strong>Old Total:</strong> ₹{report.edits[0].oldFinalTotal} <br />
+                         <strong>Discount:</strong> {parseFloat(report.edits[0].discountPercent)}% <br />
+                        <strong>New Total:</strong> ₹{report.edits[0].newFinalTotal} <br />
+                      </>
+                    ) : (
+                      <>
+                        <strong>Item:</strong> {report.edits[0].itemName} <br />
+                        <strong>Change:</strong> {report.edits[0].changeType} <br />
+                        <strong>Qty:</strong> {report.edits[0].changeQty} <br />
+                        <strong>Unit Price:</strong> ₹{report.edits[0].unitPrice} <br />
+                        <strong>Total:</strong> ₹{report.edits[0].total} <br />
+                      </>
+                    )}
+                  </>
+                )}
+                {report.edits.length > 1 && (
+                  <button
+                    onClick={() => openModal(report)}
+                    style={{
+                      border: 'none',
+                      textDecoration: 'underline',
+                      color: 'blue',
+                      background: 'none',
+                      cursor: 'pointer',
+                      marginTop: '5px',
+                    }}
+                  >
+                    View All ({report.edits.length})
+                  </button>
+                )}
+              </div>
+            </td>
+            <td>{report.finalTotal}</td>
+          </tr>
+        ))
+      ) : (
+        <tr>
+          <td colSpan="6" style={{ textAlign: 'center' }}>
+            No reports found for the selected filters.
+          </td>
+        </tr>
+      )}
+    </tbody>
           </table>
         </div>
       </div>
@@ -272,21 +286,33 @@ const ReportPage = () => {
             }}
           >
             <h5>All Edits for Order #{selectedReport.orderId}</h5>
-            <button
-              style={{ float: 'right', marginBottom: '10px' }}
-              onClick={closeModal}
-            >
-              Close
-            </button>
+      <button
+        style={{ float: 'right', marginBottom: '10px' }}
+        onClick={closeModal}
+      >
+        Close
+      </button>
+
+            
             {selectedReport.edits.map(({ time, ...edit }, index) => (
               <div key={index} style={{ marginBottom: '10px' }}>
-                <strong>Item:</strong> {edit.itemName} <br />
-                <strong>Change:</strong> {edit.changeType} <br />
-                <strong>Qty:</strong> {edit.changeQty} <br />
-                <strong>Unit Price:</strong> ₹{edit.unitPrice} <br />
-                <strong>Total:</strong> ₹{edit.total}
-                {index < selectedReport.edits.length - 1 && <hr />}
-              </div>
+          {edit.type === 'discount' ? (
+            <>
+              <strong>Discount Applied</strong><br />
+              <strong>Old Total:</strong> ₹{edit.oldFinalTotal} <br />
+                 <strong>Discount:</strong> {parseFloat(edit.discountPercent)}%<br />
+              <strong>New Total:</strong> ₹{edit.newFinalTotal} <br />
+            </>
+          ) : (
+            <>
+              <strong>Item:</strong> {edit.itemName} <br />
+              <strong>Change:</strong> {edit.changeType} <br />
+              <strong>Qty:</strong> {edit.changeQty} <br />
+              <strong>Unit Price:</strong> ₹{edit.unitPrice} <br />
+              <strong>Total:</strong> ₹{edit.total} <br />
+            </>
+          )}
+          {index < selectedReport.edits.length - 1 && <hr />}   </div>
             ))}
           </div>
         </div>

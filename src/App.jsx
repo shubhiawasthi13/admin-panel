@@ -13,6 +13,7 @@ import './App.css';
           <Link to="/orders">Dinning Orders</Link>
           <Link to="/zomato">Zomato Orders</Link>
           <Link to="/inventory">Inventory</Link>
+          <Link to="/ingredients">Add Ingredients</Link>
           <Link to="/setup">SetUp</Link>
           <Link to="/report">Report</Link>
           <Link to="/history">History</Link>

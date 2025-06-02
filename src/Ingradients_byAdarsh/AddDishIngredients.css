@@ -1,0 +1,66 @@
+.dish-container {
+    padding: 24px;
+    max-width: 600px;
+    margin: auto;
+    margin-top: 100px;
+    border: 1px solid #4b0a0a;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .heading {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  
+  .dropdown,
+  .input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    width: 100%;
+    margin-bottom: 12px;
+  }
+  
+  .ingredient-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .half {
+    width: 50%;
+  }
+  
+  .add-more-btn,
+  .submit-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  
+  .add-more-btn {
+    background-color: #007bff;
+    margin-bottom: 20px;
+  }
+  
+  .add-more-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  .submit-container {
+    text-align: right;
+  }
+  
+  .submit-btn {
+    background-color: #28a745;
+  }
+  
+  .submit-btn:hover {
+    background-color: #218838;
+  }
+  

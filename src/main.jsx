@@ -11,6 +11,7 @@ import App from './App.jsx';
 import Dashboard from './dashboard/dasboard.jsx';
 import SetupPage from './Set-up/setup_page.jsx';
 import ReportPage from './Report/report.jsx'
+import Ingredients from './ingredients/Ingredients.jsx';
 // import RestaurantHistory from './Retsro-History/restro-history.jsx';
 
 
@@ -25,13 +26,13 @@ createRoot(document.getElementById('root')).render(
             <Route index element= {<Dashboard/>}/>
             <Route path="add-dish" element={<AddDish />} />
             <Route path="orders" element={<Orders />} />
-            {/* <Route path="/add-dish" element={<AddDish />} /> */}
             <Route path="zomato" element={<Zomato />} />
             <Route path="inventory" element={<Inventory />} />
             <Route path="setup" element={<SetupPage />} />
             <Route path="report" element={<ReportPage />} />
             <Route path="history" element={<RestaurantHistory />} />
             <Route path="reorder" element={<Reorder />} />
+            <Route path="ingredients" element={<Ingredients />} />
             {/* <Route path="/settings" element={<Setting />} /> */}
             </Route>
           </Routes>

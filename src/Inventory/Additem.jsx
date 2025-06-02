@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
+import axios from "axios";
 
 function AddNewItem() {
   const [itemName, setItemName] = useState('');
-  const [itemUnit, setItemUnit] = useState('');
+  const [threshold, setThreshold] = useState('');
   const [inStock, setInStock] = useState('');
-  const [inStockUnit, setInStockUnit] = useState('gm'); // Default unit
+  const [itemUnit, setItemUnit] = useState('gm'); // Default unit
   const [expiryDate, setExpiryDate] = useState('');
   const [category, setCategory] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
@@ -13,20 +14,47 @@ function AddNewItem() {
     window.location.reload();
   };
 
-  const handleSubmit = (event) => {
+  const clearForm = ()=>{
+    setItemName('');
+    setThreshold('')
+    setInStock('')
+    setItemUnit('')
+    setExpiryDate('')
+    setCategory('')
+    setTotalAmount(0)
+  }
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
     // Handle form submission logic here
     console.log({
       itemName,
-      itemUnit,
+      threshold,
       inStock,
-      inStockUnit,
+      itemUnit,
       expiryDate,
       category,
       totalAmount,
     });
-    alert("Item added succesfully");
-    reloadPage();
+
+    try {
+      const result = await axios.post("http://localhost:3000/api/addInventItem", {
+        itemName,
+        threshold,
+        inStock,
+        itemUnit,
+        expiryDate,
+        category,
+        totalAmount,
+      });
+    
+      console.log(result.data);
+      alert("Item added successfully");
+      clearForm();
+    } catch (error) {
+      console.error("Error adding item:", error);
+      alert("Failed to add item");
+    }
 
   };
 
@@ -48,13 +76,13 @@ function AddNewItem() {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="itemUnit">Item Unit</label>
+          <label htmlFor="itemUnit">Threshold</label>
           <br />
           <input
             type="text"
             id="itemUnit"
-            value={itemUnit}
-            onChange={(e) => setItemUnit(e.target.value)}
+            value={threshold}
+            onChange={(e) => setThreshold(e.target.value)}
           />
         </div>
 
@@ -76,8 +104,8 @@ function AddNewItem() {
         <select
           id="inStockUnit"
           style={{width:"60px", fontSize:"13px"}}
-          value={inStockUnit}
-          onChange={(e) => setInStockUnit(e.target.value)}
+          value={itemUnit}
+          onChange={(e) => setItemUnit(e.target.value)}
           
         >
           <option value="gm">gm</option>
@@ -119,6 +147,7 @@ function AddNewItem() {
             id="totalAmount"
             value={totalAmount}
             onChange={(e) => setTotalAmount(e.target.value)}
+            placeHolder="Rs."
           />
         </div>
         </div>
