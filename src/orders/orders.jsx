@@ -1094,7 +1094,12 @@ setFilteredItems((prev) => {
               
             ))}
          {/* latest changes */}
-            <p>Discount Total: { total< totalBill?  total : 0}</p>
+            {/* <p>Discount Total: { item.total< totalBill?  item.total : 0}</p> */}
+            <p>
+  Discount Applied: ₹{(totalBill - item.total ).toFixed(2)} 
+  ({((totalBill - item.total)/totalBill*100).toFixed(0)}% off)
+</p>
+<p>Grand Total: ₹{item.total.toFixed(2)}</p>
 
                         
           {/* latest changes */}

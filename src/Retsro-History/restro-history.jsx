@@ -591,18 +591,13 @@ const sampleData = [
 ];
 
 // Helper function to parse date from the restored string
-const parseInventoryDate = (restoredStr) => {
-  const dateStr = restoredStr.split(' ')[0] + ' ' + restoredStr.split(' ')[1] + ' ' + restoredStr.split(' ')[2];
-  const months = {
-    Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06',
-    Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12'
-  };
-  const parts = dateStr.split(' ');
-  const month = months[parts[0]];
-  const day = parts[1].replace(',', '').padStart(2, '0');
-  const year = parts[2];
-  return `${year}-${month}-${day}`;
+const parseInventoryDate = (dateStr) => {
+  const cleaned = dateStr.split('-')[0].trim(); // "Jun 2, 2025"
+  const parsed = new Date(cleaned);
+  if (isNaN(parsed.getTime())) return '';
+  return parsed.toISOString().split('T')[0];
 };
+
 
 const Modal = ({data, tableNo, closeModal }) => {
   return (
@@ -724,15 +719,9 @@ export default function RestaurantHistory() {
     
       // If no date is selected, filter only by the search term
       if (!selectedDate) return matchesSearch;
-    
-      // Parse the restock_time string into a Date object
-      const restockDate = new Date(entry.restock_time);
-    
-      // Format the restockDate to match the 'yyyy-mm-dd' format (same as selectedDate)
-      const inventoryDate = restockDate.toISOString().split('T')[0]; // Extract the date part (yyyy-mm-dd)
-    
-      // Compare the extracted date with selectedDate
-      return inventoryDate === selectedDate && matchesSearch;
+        const inventoryDate = parseInventoryDate(entry.restock_time); // ✅ correct key
+    const matchesDate = inventoryDate === selectedDate;
+    return matchesDate && matchesSearch;
     });
 
   useEffect(() => {
@@ -812,7 +801,7 @@ useEffect(() => {
 
     setFilteredFinishedOrders(filtered);
   }
-}, [searchTerm, finishedOrders, selectedDate]);
+}, [searchTerm, finishedOrders]);
 
 
   const formatDateTime = (dateString) => {
