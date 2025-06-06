@@ -527,68 +527,7 @@ import "./history.css";
 
 const socket = io("http://localhost:3000");
 
-const sampleData = [
-  {
- 
-    tableNo: '01',
-    time: '	Apr 18, 2025 - 08:42 AM',
-    item: 'Grilled Salmon',
-    quantity: '2',
-    price: 450,
-    discount: 0,
-    remarks: 'Item manually added to bill',
-  },
-  {
-  
-    tableNo: '01',
-    time: '	Apr 14, 2025 - 01:22 PM',
-    item: 'Caesar Salad',
-    quantity: '1',
-    price: 280,
-    discount: 0,
-    remarks: 'Item removed from bill',
-   
-  },
-  {
-    tableNo: '02',
-    time: 'Apr 10, 2025 - 06:25 PM',
-    item: 'Caesar Salad',
-    quantity: '1',
-    price: 280,
-    discount: 0,
-    remarks: 'Item removed from bill',
-  },
-  {
-    tableNo: '02',
-    time: 'Apr 16, 2025 - 11:30 AM',
-    item: 'Chocolate Mousse',
-    quantity: '2',
-    price: 200,
-    discount: 0,
-    changeType: 'increase', // or 'decrease'
-    remarks: 'Item quantity manually updated',
-  }
-,  
-{
-  tableNo: '07',
-  time: 'Apr 12, 2025 - 03:55 PM',
-  item: 'Chocolate Mousse',
-  quantity: '2',
-  price: 200,
-  discount: 0,
-  changeType: 'increase', // or 'decrease'
-  remarks: 'Item quantity manually updated',
-}
-,  
-  {
-    tableNo: '08',
-    time: 'Apr 11, 2025 - 05:10 PM',
-    item: 'Entire Bill',
-    quantity: '10%',
-    remarks: 'Manual discount was applied to bill total',
-    originalTotal: 1000,
-  },
-];
+
 
 // Helper function to parse date from the restored string
 const parseInventoryDate = (dateStr) => {
@@ -599,100 +538,49 @@ const parseInventoryDate = (dateStr) => {
 };
 
 
-const Modal = ({data, tableNo, closeModal }) => {
-  return (
-    <div className="modal-overlay" onClick={closeModal}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <h4>Report of Table No: {tableNo}</h4>
-        <hr />
-        {/* <ul className="orders-list" style={{listStyleType: 'none', paddingLeft: '0'}}>
-          {data.map((entry, index) => (
-            <li key={index} style={{marginTop: "15px", borderBottom: "1px solid #ccc", paddingBottom: "10px"}}>
-            
-              <strong>TIME</strong>: {entry.time}
-              <br />
-              <strong>ITEM NAME</strong>: {entry.item}
-              <br />
-              <strong>QUANTITY</strong>: {entry.quantity}
-              <br />
-              <strong>REMARKS</strong>: 
-              {entry.originalTotal && typeof entry.quantity === 'string' && entry.quantity.includes('%') ? (
-                <>
-                  {(() => {
-                    const percent = parseFloat(entry.quantity);
-                    if (!isNaN(percent)) {
-                      const discountAmount = (percent / 100) * entry.originalTotal;
-                      const finalTotal = entry.originalTotal - discountAmount;
-
-                      return (
-                        <>
-                        
-                            Manual discount of ₹{Math.round(discountAmount)} ({entry.quantity}) was applied to bill total.
-                        
-                          <br />
-                          <strong>Original Total:</strong> ₹{Math.round(entry.originalTotal)}
-                          <br />
-                          <strong>Discounted Total:</strong> ₹{Math.round(finalTotal)}
-                        </>
-                      );
-                    } else {
-                      return <>{entry.remarks}</>;
-                    }
-                  })()}
-                </>
-              ) : (
-                <>
-                  {entry.remarks}
-                  {entry.changeType && entry.remarks?.toLowerCase().includes('quantity') && (
-                    <>
-                      <br />
-                      <strong>Change:</strong>{' '}
-                      {entry.changeType === 'increase' ? 'Quantity Increased' : 'Quantity Decreased'}
-                    </>
-                  )}
-                  {entry.price !== undefined && (
-                    <>
-                      <br />
-                      <strong>Unit Price:</strong> ₹{Math.round(entry.price)}
-                      {entry.quantity && !isNaN(entry.quantity) && (
-                        <>
-                          <br />
-                          <strong>Total:</strong> ₹{Math.round(entry.price * Number(entry.quantity))}
-                        </>
-                      )}
-                    </>
-                  )}
-                  {entry.discount !== undefined && entry.discount > 0 && (
-                    <>
-                      <br />
-                      <strong>After Discount:</strong> ₹{Math.round(entry.price - entry.discount)}
-                    </>
-                  )}
-                </>
-              )}
-            </li>
-          ))}
-        </ul> */}
-
-        <button onClick={closeModal}>Close</button>
-      </div>
-    </div>
-  );
-};
 
 
 export default function RestaurantHistory() {
   const [activeTab, setActiveTab] = useState('orders');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedTableNo, setSelectedTableNo] = useState(null);
-  const [modalData, setModalData] = useState([]);
   const [finishedOrders, setFinishedOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
   const [filteredFinishedOrders, setFilteredFinishedOrders] = useState([]);
   const [inventoryData, setInventoryData] = useState([]);
+const [reportData, setReportData] = useState([]);
+const [reportLoading, setReportLoading] = useState(false);
+const [reportError, setReportError] = useState(null);
+const [showReportModal, setShowReportModal] = useState(false);
+
+
+const fetchAndFilterReport = async (orderId, tableNo) => {
+  try {
+    setReportLoading(true);
+    setReportError(null);
+
+    const response = await fetch("http://localhost:3000/api/get-reports");
+    const data = await response.json();
+
+    console.log("🔎 API Data:", data); // Check what you're getting
+const filtered = data.filter(
+  report => String(report.orderId) === String(orderId) &&
+            String(report.tableNumber) === String(tableNo)
+);
+
+    console.log("✅ Filtered Reports:", filtered); // Check if anything matches
+
+    setReportData(filtered);
+    setShowReportModal(true);
+  } catch (error) {
+    console.error("Error fetching reports:", error);
+    setReportError("Failed to load report data");
+  } finally {
+    setReportLoading(false);
+  }
+};
+
 
 
     // Fetch inventory history from backend
@@ -823,11 +711,7 @@ useEffect(() => {
     }
   };
 
-  const calculateTotal = (order) => {
-    return order.order_items
-      .flatMap(item => item.order_details)
-      .reduce((sum, item) => sum + (item.dish_cost * item.quantity), 0);
-  };
+ 
 
   const getItemNames = (order) => {
     const items = order.order_items.flatMap(item => 
@@ -846,14 +730,7 @@ useEffect(() => {
     setShowDetails(true);
   };
 
-  const handleTableClick = (tableNo, dateTime) => {
-    const filteredData = sampleData.filter(entry => 
-      entry.tableNo === tableNo.toString() && entry.time.trim() === dateTime.trim()
-    );
-    setModalData(filteredData);
-    setSelectedTableNo(tableNo);
-    setIsModalOpen(true);
-  };
+
 
   
 
@@ -937,17 +814,24 @@ useEffect(() => {
             <tbody>
               {filteredFinishedOrders.length > 0 ? (
                 filteredFinishedOrders.map((order) => (
+                  
                   <tr
                     key={order.order_id} 
                     className="order-history-item"
                   >
                     <td>#{order.order_id}</td>
-                    <td 
-                      style={{ cursor: 'pointer', color: 'blue' }}
-                      onClick={() => handleTableClick(order.table_no)}
-                    >
-                      {order.table_no}
-                    </td>
+                   <td
+  style={{ cursor: 'pointer', color: 'blue' }}
+ onClick={() => {
+  const actualTableNo = order.table_no ?? (order.merged_table?.tables?.[0] ?? null);
+  fetchAndFilterReport(order.order_id, actualTableNo);
+}}
+
+>
+  {order.table_no}
+</td>
+
+
                     <td>{formatDateTime(order.created_at)}</td>
                     <td
                       className="order-data clickable-items" 
@@ -955,7 +839,8 @@ useEffect(() => {
                     >
                       {getItemNames(order)}
                     </td>
-                    <td className="order-data">₹{calculateTotal(order).toFixed(2)}</td>
+                  <td className="order-data">₹{order.total?.toFixed(2)}</td>
+
                   </tr>
                 ))
               ) : (
@@ -1000,7 +885,8 @@ useEffect(() => {
                 </div>
 
                 <div className="order-total">
-                  <h5>Total: ₹{calculateTotal(selectedOrder).toFixed(2)}</h5>
+                <h5>Total: ₹{selectedOrder.total?.toFixed(2)}</h5>
+
                 </div>
               </div>
             </div>
@@ -1041,13 +927,74 @@ useEffect(() => {
       </div>
       )
       }
-      {isModalOpen && (
-        <Modal
-          data={modalData}
-          tableNo={selectedTableNo}
-          closeModal={() => setIsModalOpen(false)}
-        />
+{showReportModal && (
+  <div className="report-modal" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', zIndex: 999 }}>
+    <div className="modal-content" style={{ position: 'relative', margin: '10% auto', padding: '20px', background: '#fff', width: '80%', maxWidth: '600px', borderRadius: '8px' }}>
+      
+      {/* Close Button in Top Right */}
+      <button
+        onClick={() => setShowReportModal(false)}
+        style={{
+          position: 'absolute',
+          top: '10px',
+          right: '15px',
+          fontSize: '24px',
+          fontWeight: 'bold',
+          border: 'none',
+          background: 'transparent',
+          cursor: 'pointer',
+          color: '#333'
+        }}
+      >
+        ×
+      </button>
+
+      <h2>Order Report</h2>
+
+      {reportLoading ? (
+        <p>Loading...</p>
+      ) : reportError ? (
+        <p style={{ color: 'red' }}>{reportError}</p>
+      ) : reportData.length > 0 ? (
+        reportData.map((report, index) => (
+          <div key={index} className="report-block" style={{ marginBottom: '20px' }}>
+            <p><strong>Order ID:</strong> #{report.orderId}</p>
+            <p><strong>Table No:</strong> {report.tableNumber}</p>
+            <p><strong>Time:</strong> {new Date(report.time).toLocaleString()}</p>
+            <p><strong>Original Total:</strong> ₹{report.originalTotal}</p>
+            <p><strong>Final Total:</strong> ₹{report.finalTotal}</p>
+
+            <h4>Edits:</h4>
+            <ul className="report-list" style={{ listStyle: 'none', paddingLeft: 0 }}>
+              {report.edits.map((edit, i) => (
+                <li key={i} style={{ marginBottom: '10px', background: '#f5f5f5', padding: '10px', borderRadius: '5px' }}>
+                  {edit.type === "discount" ? (
+                    <>
+                      <strong>Discount Applied:</strong><br />
+                      {edit.discountPercent} off — ₹{edit.oldFinalTotal} ➜ ₹{edit.newFinalTotal}<br />
+                   
+                    </>
+                  ) : (
+                    <>
+                      <strong>{edit.itemName}</strong> — {edit.changeType}<br />
+                      Qty: {edit.changeQty}, Unit Price: ₹{edit.unitPrice}, Total: ₹{edit.total}<br />
+                
+                    </>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      ) : (
+        <p>No report data for this order.</p>
       )}
+    </div>
+  </div>
+)}
+
+
+    
     </div>
   );
 }

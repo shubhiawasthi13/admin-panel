@@ -1275,7 +1275,7 @@ const OrderCard = ({ order, status, onUpdateStatus, handleSlectedTable }) => {
       <div className="order-meta">
         <span className="order-id">OrderId: #{order.order_id}</span>
         <br />
-        <span className="order-total">₹{totalPrice.toFixed(2)}</span>
+        <span className="order-total">₹{order.total}</span>
       </div>
     </div>
   );
