@@ -1,4 +1,3 @@
-
 // import React, { useState } from 'react';
 // import './history.css';
 // import { FaSearch } from 'react-icons/fa';
@@ -21,7 +20,7 @@
 //     price: 280,
 //     discount: 0,
 //     remarks: 'Item removed from bill',
-   
+
 //   },
 //   {
 //     tableNo: '02',
@@ -42,7 +41,7 @@
 //     changeType: 'increase', // or 'decrease'
 //     remarks: 'Item quantity manually updated',
 //   }
-// ,  
+// ,
 // {
 //   tableNo: '07',
 //   time: 'Apr 12, 2025 - 03:55 PM',
@@ -53,7 +52,7 @@
 //   changeType: 'increase', // or 'decrease'
 //   remarks: 'Item quantity manually updated',
 // }
-// ,  
+// ,
 //   {
 //     tableNo: '08',
 //     time: 'Apr 11, 2025 - 05:10 PM',
@@ -246,14 +245,14 @@
 //         <ul className="orders-list" style={{listStyleType: 'none', paddingLeft: '0'}}>
 //           {data.map((entry, index) => (
 //             <li key={index} style={{marginTop: "15px", borderBottom: "1px solid #ccc", paddingBottom: "10px"}}>
-            
+
 //               <strong>TIME</strong>: {entry.time}
 //               <br />
 //               <strong>ITEM NAME</strong>: {entry.item}
 //               <br />
 //               <strong>QUANTITY</strong>: {entry.quantity}
 //               <br />
-//               <strong>REMARKS</strong>: 
+//               <strong>REMARKS</strong>:
 //               {entry.originalTotal && typeof entry.quantity === 'string' && entry.quantity.includes('%') ? (
 //                 <>
 //                   {(() => {
@@ -264,9 +263,9 @@
 
 //                       return (
 //                         <>
-                        
+
 //                             Manual discount of ₹{Math.round(discountAmount)} ({entry.quantity}) was applied to bill total.
-                        
+
 //                           <br />
 //                           <strong>Original Total:</strong> ₹{Math.round(entry.originalTotal)}
 //                           <br />
@@ -318,8 +317,6 @@
 //   );
 // };
 
-
-
 // export default function RestaurantHistory() {
 //   const [activeTab, setActiveTab] = useState('orders');
 //   const [searchTerm, setSearchTerm] = useState('');
@@ -329,12 +326,12 @@
 //   const [modalData, setModalData] = useState([]);
 
 //   const filteredOrders = mockOrders.filter(order => {
-//     const matchesSearch = order.items.toLowerCase().includes(searchTerm.toLowerCase()) || 
+//     const matchesSearch = order.items.toLowerCase().includes(searchTerm.toLowerCase()) ||
 //                          order.orderId.includes(searchTerm);
-    
+
 //     // If no date is selected, only filter by search term
 //     if (!selectedDate) return matchesSearch;
-    
+
 //     // If date is selected, filter by both date and search term
 //     const orderDate = parseOrderDate(order.dateTime);
 //     const matchesDate = orderDate === selectedDate;
@@ -343,35 +340,31 @@
 
 //   const filteredInventory = mockInventory.filter(entry => {
 //     const matchesSearch = entry.item.toLowerCase().includes(searchTerm.toLowerCase());
-  
+
 //     if (!selectedDate) return matchesSearch;
-  
+
 //     const inventoryDate = parseInventoryDate(entry.restoredDate); // ✅ correct key
 //     const matchesDate = inventoryDate === selectedDate;
 //     return matchesDate && matchesSearch;
 //   });
 //   const handleTableClick = (tableNo, dateTime) => {
 //     // Find all entries for the clicked table number with matching dateTime
-//     const filteredData = sampleData.filter(entry => 
+//     const filteredData = sampleData.filter(entry =>
 //       entry.tableNo === tableNo && entry.time.trim() === dateTime.trim()
 //     );
-  
+
 //     if (filteredData.length === 0) {
 //       console.log('No data found for table:', tableNo, 'at time:', dateTime);
 //     } else {
 //       console.log('Filtered Data for table', tableNo, 'at time', dateTime, ':', filteredData);
 //     }
-  
+
 //     // Set the filtered data for the modal and open the modal
 //     setModalData(filteredData);
 //     setSelectedTableNo(tableNo);
 //     setIsModalOpen(true);
 //   };
-  
-  
-  
-  
-  
+
 //   {isModalOpen && (
 //     <Modal
 //       data={modalData}  // Pass filtered data to Modal
@@ -379,8 +372,6 @@
 //       closeModal={() => setIsModalOpen(false)}
 //     />
 //   )}
-  
-  
 
 //   return (
 //     <div className="restaurant-history-container">
@@ -396,8 +387,8 @@
 //             onChange={(e) => setSelectedDate(e.target.value)}
 //           />
 //           {selectedDate && (
-//             <button 
-//               className="clear-date" 
+//             <button
+//               className="clear-date"
 //               onClick={() => setSelectedDate('')}
 //             >
 //               Clear
@@ -449,8 +440,8 @@
 //               {filteredOrders.map((order, idx) => (
 //   <tr key={idx}>
 //     <td>{order.orderId}</td>
-//     <td 
-//       style={{ cursor: 'pointer', color: 'blue' }} 
+//     <td
+//       style={{ cursor: 'pointer', color: 'blue' }}
 //       onClick={() => handleTableClick(order.tableNo, order.dateTime)}
 //     >
 //       {order.tableNo}
@@ -499,14 +490,14 @@
 //           </table>
 //         ) : (
 //           <div className="no-data-message">
-//             {selectedDate 
+//             {selectedDate
 //               ? "No inventory updates found for the selected date and search criteria."
 //               : "No inventory updates found matching your search criteria."}
 //           </div>
 //         )}
 //       </div>
 //       )}
-      
+
 //       {isModalOpen && (
 //         <Modal
 //           data={modalData}
@@ -518,105 +509,101 @@
 //   );
 // }
 
-
-
-import React, { useState, useEffect } from 'react';
-import { FaSearch } from 'react-icons/fa';
+import React, { useState, useEffect } from "react";
+import { FaSearch } from "react-icons/fa";
 import io from "socket.io-client";
 import "./history.css";
 
 const socket = io("http://localhost:3000");
 
-
-
 // Helper function to parse date from the restored string
 const parseInventoryDate = (dateStr) => {
-  const cleaned = dateStr.split('-')[0].trim(); // "Jun 2, 2025"
+  const cleaned = dateStr.split("-")[0].trim(); // "Jun 2, 2025"
   const parsed = new Date(cleaned);
-  if (isNaN(parsed.getTime())) return '';
-  return parsed.toISOString().split('T')[0];
+  if (isNaN(parsed.getTime())) return "";
+  return parsed.toISOString().split("T")[0];
 };
 
-
-
-
 export default function RestaurantHistory() {
-  const [activeTab, setActiveTab] = useState('orders');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDate, setSelectedDate] = useState('');
+  const [activeTab, setActiveTab] = useState("orders");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
   const [finishedOrders, setFinishedOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
   const [filteredFinishedOrders, setFilteredFinishedOrders] = useState([]);
   const [inventoryData, setInventoryData] = useState([]);
-const [reportData, setReportData] = useState([]);
-const [reportLoading, setReportLoading] = useState(false);
-const [reportError, setReportError] = useState(null);
-const [showReportModal, setShowReportModal] = useState(false);
+  const [reportData, setReportData] = useState([]);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportError, setReportError] = useState(null);
+  const [showReportModal, setShowReportModal] = useState(false);
 
+  const fetchAndFilterReport = async (orderId, tableNo) => {
+    try {
+      setReportLoading(true);
+      setReportError(null);
 
-const fetchAndFilterReport = async (orderId, tableNo) => {
-  try {
-    setReportLoading(true);
-    setReportError(null);
+      const response = await fetch("http://localhost:3000/api/get-reports");
+      const data = await response.json();
 
-    const response = await fetch("http://localhost:3000/api/get-reports");
-    const data = await response.json();
+      console.log("🔎 API Data:", data); // Check what you're getting
+      const filtered = data.filter(
+        (report) =>
+          String(report.orderId) === String(orderId) &&
+          String(report.tableNumber) === String(tableNo)
+      );
 
-    console.log("🔎 API Data:", data); // Check what you're getting
-const filtered = data.filter(
-  report => String(report.orderId) === String(orderId) &&
-            String(report.tableNumber) === String(tableNo)
-);
+      console.log("✅ Filtered Reports:", filtered); // Check if anything matches
 
-    console.log("✅ Filtered Reports:", filtered); // Check if anything matches
+      setReportData(filtered);
+      setShowReportModal(true);
+    } catch (error) {
+      console.error("Error fetching reports:", error);
+      setReportError("Failed to load report data");
+    } finally {
+      setReportLoading(false);
+    }
+  };
 
-    setReportData(filtered);
-    setShowReportModal(true);
-  } catch (error) {
-    console.error("Error fetching reports:", error);
-    setReportError("Failed to load report data");
-  } finally {
-    setReportLoading(false);
-  }
-};
-
-
-
-    // Fetch inventory history from backend
-    useEffect(() => {
-      const fetchInventoryHistory = async () => {
-        try {
-          const response = await fetch('http://localhost:3000/api/inventoryHistory'); // Adjust the URL as per your backend API endpoint
-          if (!response.ok) {
-            throw new Error('Failed to fetch inventory history');
-          }
-          const data = await response.json();
-          setInventoryData(data); // Set the inventory data to the state
-        } catch (error) {
-          console.error('Error fetching inventory history:', error);
+  // Fetch inventory history from backend
+  useEffect(() => {
+    const fetchInventoryHistory = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:3000/api/inventoryHistory"
+        ); // Adjust the URL as per your backend API endpoint
+        if (!response.ok) {
+          throw new Error("Failed to fetch inventory history");
         }
-      };
-      
-      fetchInventoryHistory();
-    }, []); // Empty dependency array ensures this runs only once after the component mounts
-  
-    // Filter inventory data based on search term and selected date
-    const filteredInventory = inventoryData.filter(entry => {
-      const matchesSearch = entry.item_name.toLowerCase().includes(searchTerm.toLowerCase());
-    
-      // If no date is selected, filter only by the search term
-      if (!selectedDate) return matchesSearch;
-        const inventoryDate = parseInventoryDate(entry.restock_time); // ✅ correct key
+        const data = await response.json();
+        setInventoryData(data); // Set the inventory data to the state
+      } catch (error) {
+        console.error("Error fetching inventory history:", error);
+      }
+    };
+
+    fetchInventoryHistory();
+  }, []); // Empty dependency array ensures this runs only once after the component mounts
+
+  // Filter inventory data based on search term and selected date
+  const filteredInventory = inventoryData.filter((entry) => {
+    const matchesSearch = entry.item_name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+    // If no date is selected, filter only by the search term
+    if (!selectedDate) return matchesSearch;
+    const inventoryDate = parseInventoryDate(entry.restock_time); // ✅ correct key
     const matchesDate = inventoryDate === selectedDate;
     return matchesDate && matchesSearch;
-    });
+  });
 
   useEffect(() => {
     socket.on("orderUpdate", (data) => {
       console.log("Order Update Received: ", data);
-      const recentFinishedOrders = [...data.finishedOrders]
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      const recentFinishedOrders = [...data.finishedOrders].sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
       setFinishedOrders(recentFinishedOrders);
       setFilteredFinishedOrders(recentFinishedOrders); // Initialize filtered orders
     });
@@ -626,102 +613,115 @@ const filtered = data.filter(
     };
   }, []);
 
-// Filter orders based on search term and selected date
-useEffect(() => {
-  if (finishedOrders.length > 0) {
-    const filtered = finishedOrders.filter(order => {
-      const searchTermLower = searchTerm.toLowerCase().trim();
-      const tableNumbers = order.table_no != null
-        ? [order.table_no.toString()]
-        : Array.isArray(order.merged_table?.tables)
-          ? order.merged_table.tables.map(t => t.toString())
-          : [];
+  // Filter orders based on search term and selected date
+  useEffect(() => {
+    if (finishedOrders.length > 0) {
+      const filtered = finishedOrders.filter((order) => {
+        const searchTermLower = searchTerm.toLowerCase().trim();
+        const tableNumbers =
+          order.table_no != null
+            ? [order.table_no.toString()]
+            : Array.isArray(order.merged_table?.tables)
+            ? order.merged_table.tables.map((t) => t.toString())
+            : [];
 
-      const joinedTableStr = tableNumbers.join(',').toLowerCase();
+        const joinedTableStr = tableNumbers.join(",").toLowerCase();
 
-      // If searching by order ID (starts with #)
-      if (searchTermLower.startsWith('#')) {
-        const searchId = searchTermLower.substring(1);
-        const matchesOrderId = (order.order_id ?? '').toString().includes(searchId);
+        // If searching by order ID (starts with #)
+        if (searchTermLower.startsWith("#")) {
+          const searchId = searchTermLower.substring(1);
+          const matchesOrderId = (order.order_id ?? "")
+            .toString()
+            .includes(searchId);
 
-        if (!selectedDate) return matchesOrderId;
-        const orderDate = new Date(order.created_at).toISOString().split('T')[0];
-        return matchesOrderId && (orderDate === selectedDate);
-      }
-
-      // Check if searching by table number (starts with "table" or is numeric)
-      const isTableSearch = searchTermLower.startsWith('table') || /^\d+$/.test(searchTermLower);
-      if (isTableSearch) {
-        let tableSearchTerm = searchTermLower;
-        if (searchTermLower.startsWith('table')) {
-          tableSearchTerm = searchTermLower.replace('table', '').trim();
+          if (!selectedDate) return matchesOrderId;
+          const orderDate = new Date(order.created_at)
+            .toISOString()
+            .split("T")[0];
+          return matchesOrderId && orderDate === selectedDate;
         }
 
-        const matchesTableNo = tableNumbers.some(no =>
-          no.includes(tableSearchTerm) || no.padStart(2, '0').includes(tableSearchTerm)
+        // Check if searching by table number (starts with "table" or is numeric)
+        const isTableSearch =
+          searchTermLower.startsWith("table") || /^\d+$/.test(searchTermLower);
+        if (isTableSearch) {
+          let tableSearchTerm = searchTermLower;
+          if (searchTermLower.startsWith("table")) {
+            tableSearchTerm = searchTermLower.replace("table", "").trim();
+          }
+
+          const matchesTableNo = tableNumbers.some(
+            (no) =>
+              no.includes(tableSearchTerm) ||
+              no.padStart(2, "0").includes(tableSearchTerm)
+          );
+
+          if (!selectedDate) return matchesTableNo;
+          const orderDate = new Date(order.created_at)
+            .toISOString()
+            .split("T")[0];
+          return matchesTableNo && orderDate === selectedDate;
+        }
+
+        // General search (items, table no, or order id)
+        const matchesTableNo =
+          joinedTableStr.includes(searchTermLower) ||
+          `table ${joinedTableStr}`.includes(searchTermLower) ||
+          joinedTableStr.padStart(2, "0").includes(searchTermLower);
+
+        const matchesOrderId = order.order_id
+          .toString()
+          .includes(searchTermLower);
+
+        const matchesItemNames = order.order_items.some((item) =>
+          item.order_details.some((detail) =>
+            detail.dish_name.toLowerCase().includes(searchTermLower)
+          )
         );
 
-        if (!selectedDate) return matchesTableNo;
-        const orderDate = new Date(order.created_at).toISOString().split('T')[0];
-        return matchesTableNo && (orderDate === selectedDate);
-      }
+        const matchesSearch =
+          matchesTableNo || matchesOrderId || matchesItemNames;
 
-      // General search (items, table no, or order id)
-      const matchesTableNo = joinedTableStr.includes(searchTermLower) ||
-        `table ${joinedTableStr}`.includes(searchTermLower) ||
-        joinedTableStr.padStart(2, '0').includes(searchTermLower);
+        if (!selectedDate) return matchesSearch;
 
-      const matchesOrderId = order.order_id.toString().includes(searchTermLower);
+        const orderDate = new Date(order.created_at)
+          .toISOString()
+          .split("T")[0];
+        return matchesSearch && orderDate === selectedDate;
+      });
 
-      const matchesItemNames = order.order_items.some(item =>
-        item.order_details.some(detail =>
-          detail.dish_name.toLowerCase().includes(searchTermLower)
-        )
-      );
-
-      const matchesSearch = matchesTableNo || matchesOrderId || matchesItemNames;
-
-      if (!selectedDate) return matchesSearch;
-
-      const orderDate = new Date(order.created_at).toISOString().split('T')[0];
-      return matchesSearch && (orderDate === selectedDate);
-    });
-
-    setFilteredFinishedOrders(filtered);
-  }
-}, [searchTerm, finishedOrders]);
-
+      setFilteredFinishedOrders(filtered);
+    }
+  }, [searchTerm, finishedOrders,selectedDate]);
 
   const formatDateTime = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return "N/A";
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) {
-        return new Date(dateString + 'Z').toLocaleString();
+        return new Date(dateString + "Z").toLocaleString();
       }
-      return date.toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+      return date.toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       });
     } catch {
-      return 'Invalid Date/Time';
+      return "Invalid Date/Time";
     }
   };
 
- 
-
   const getItemNames = (order) => {
-    const items = order.order_items.flatMap(item => 
-      item.order_details.map(detail => detail.dish_name)
+    const items = order.order_items.flatMap((item) =>
+      item.order_details.map((detail) => detail.dish_name)
     );
-    
+
     if (items.length <= 2) {
-      return items.join(', ');
+      return items.join(", ");
     }
-    return `${items.slice(0, 2).join(', ')} + ${items.length - 2} more`;
+    return `${items.slice(0, 2).join(", ")} + ${items.length - 2} more`;
   };
 
   const handleItemsClick = (order, e) => {
@@ -730,14 +730,10 @@ useEffect(() => {
     setShowDetails(true);
   };
 
-
-
-  
-
   //   const matchesSearch = entry.item.toLowerCase().includes(searchTerm.toLowerCase());
-  
+
   //   if (!selectedDate) return matchesSearch;
-  
+
   //   const inventoryDate = parseInventoryDate(entry.restoredDate); // ✅ correct key
   //   const matchesDate = inventoryDate === selectedDate;
   //   return matchesDate && matchesSearch;
@@ -747,8 +743,8 @@ useEffect(() => {
     <div className="restaurant-history-container">
       <h2>Restaurant History</h2>
       <hr />
-     {/* Filters */}
-     <div className="filters">
+      {/* Filters */}
+      <div className="filters">
         <div className="filter-group">
           <label>Date Range</label>
           <input
@@ -757,49 +753,53 @@ useEffect(() => {
             onChange={(e) => setSelectedDate(e.target.value)}
           />
           {selectedDate && (
-            <button 
-              className="clear-date" 
-              onClick={() => setSelectedDate('')}
-            >
+            <button className="clear-date" onClick={() => setSelectedDate("")}>
               Clear
             </button>
           )}
         </div>
-        
+
         <div className="filter-group">
           {!searchTerm && (
-            <FaSearch style={{position:"absolute", top:"40px" ,left:"10px",color:"grey"}}/>
+            <FaSearch
+              style={{
+                position: "absolute",
+                top: "40px",
+                left: "10px",
+                color: "grey",
+              }}
+            />
           )}
           <input
             type="text"
             placeholder="     Search Inventory item or order"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{marginTop:"25px"}}
+            style={{ marginTop: "25px" }}
           />
-            <p style={{color:"grey", fontSize:'12px'}}>start with # for order ID search [ex- #26]</p>
+          <p style={{ color: "grey", fontSize: "12px" }}>
+            start with # for order ID search [ex- #26]
+          </p>
         </div>
-        
       </div>
-      
-      
+
       {/* Tabs */}
       <div className="tabs">
         <div
-          className={`tab ${activeTab === 'orders' ? 'active' : ''}`}
-          onClick={() => setActiveTab('orders')}
+          className={`tab ${activeTab === "orders" ? "active" : ""}`}
+          onClick={() => setActiveTab("orders")}
         >
           Order History
         </div>
         <div
-          className={`tab ${activeTab === 'inventory' ? 'active' : ''}`}
-          onClick={() => setActiveTab('inventory')}
+          className={`tab ${activeTab === "inventory" ? "active" : ""}`}
+          onClick={() => setActiveTab("inventory")}
         >
           Inventory History
         </div>
       </div>
-      
-      {activeTab === 'orders' ? (
+
+      {activeTab === "orders" ? (
         <div className="table-wrapper">
           <table className="orders-table">
             <thead>
@@ -814,192 +814,251 @@ useEffect(() => {
             <tbody>
               {filteredFinishedOrders.length > 0 ? (
                 filteredFinishedOrders.map((order) => (
-                  
-                  <tr
-                    key={order.order_id} 
-                    className="order-history-item"
-                  >
+                  <tr key={order.order_id} className="order-history-item">
                     <td>#{order.order_id}</td>
-                   <td
-  style={{ cursor: 'pointer', color: 'blue' }}
- onClick={() => {
-  const actualTableNo = order.table_no ?? (order.merged_table?.tables?.[0] ?? null);
-  fetchAndFilterReport(order.order_id, actualTableNo);
-}}
-
->
-  {order.table_no}
-</td>
-
+                    <td
+                      style={{ cursor: "pointer", color: "blue" }}
+                      onClick={() => {
+                        const actualTableNo =
+                          order.table_no ??
+                          order.merged_table?.tables?.[0] ??
+                          null;
+                        fetchAndFilterReport(order.order_id, actualTableNo);
+                      }}
+                    >
+                      {order.table_no}
+                    </td>
 
                     <td>{formatDateTime(order.created_at)}</td>
                     <td
-                      className="order-data clickable-items" 
+                      className="order-data clickable-items"
                       onClick={(e) => handleItemsClick(order, e)}
                     >
                       {getItemNames(order)}
                     </td>
-                  <td className="order-data">₹{order.total?.toFixed(2)}</td>
-
+                    <td className="order-data">₹{order.total?.toFixed(2)}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td colSpan="5" className="no-orders">
-                    {finishedOrders.length === 0 ? 'No order history available' : 'No orders match your search criteria'}
+                    {finishedOrders.length === 0
+                      ? "No order history available"
+                      : "No orders match your search criteria"}
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
-          
+
           {/* Order Details Modal */}
           {showDetails && selectedOrder && (
             <div className="order-details-modal">
               <div className="modal-content">
-                <button 
-                  className="close-button" 
+                <button
+                  className="close-button"
                   onClick={() => setShowDetails(false)}
                 >
                   ×
                 </button>
-                
+
                 <h2>Order Details</h2>
                 <div className="order-meta">
-                  <p><strong>Order ID:</strong> #{selectedOrder.order_id}</p>
-                  <p><strong>Table No:</strong> {selectedOrder.table_no}</p>
-                  <p><strong>Date & Time:</strong> {formatDateTime(selectedOrder.created_at)}</p>
-                  <p><strong>Status:</strong> Completed</p>
+                  <p>
+                    <strong>Order ID:</strong> #{selectedOrder.order_id}
+                  </p>
+                  <p>
+                    <strong>Table No:</strong> {selectedOrder.table_no}
+                  </p>
+                  <p>
+                    <strong>Date & Time:</strong>{" "}
+                    {formatDateTime(order.createdAt)}
+                  </p>
+                  <p>
+                    <strong>Status:</strong> Completed
+                  </p>
                 </div>
                 <h4>Items</h4>
                 <div className="order-items-list">
-                  {selectedOrder.order_items.flatMap(item => 
+                  {selectedOrder.order_items.flatMap((item) =>
                     item.order_details.map((detail, index) => (
                       <div key={index} className="order-item-detail">
                         <div className="item-name">{detail.dish_name}</div>
                         <div className="item-quantity">x{detail.quantity}</div>
-                        <div className="item-price">₹{(detail.dish_cost * detail.quantity).toFixed(2)}</div>
+                        <div className="item-price">
+                          ₹{(detail.dish_cost * detail.quantity).toFixed(2)}
+                        </div>
                       </div>
                     ))
                   )}
                 </div>
 
                 <div className="order-total">
-                <h5>Total: ₹{selectedOrder.total?.toFixed(2)}</h5>
-
+                  <h5>Total: ₹{selectedOrder.total?.toFixed(2)}</h5>
                 </div>
               </div>
             </div>
           )}
         </div>
-      ) :
-       (
-     
+      ) : (
         <div className="table-wrapper">
-        <table className="orders-table">
-          <thead>
-            <tr>
-              <th>ITEM NAME</th>
-              <th>OLD STOCK</th>
-              <th>RESTORED</th>
-              <th>CURRENT STOCK</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredInventory.length > 0 ? (
-              filteredInventory.map((entry, index) => (
-                <tr key={index}>
-                  <td>{entry.item_name}</td>
-                  <td>{entry.old_stock}{entry.unit}</td>
-                  <td>{entry.restock_time}    ({entry.added_stock}{entry.unit})</td>
-                  <td>{entry.current_stock}{entry.unit}</td>
+          <table className="orders-table">
+            <thead>
+              <tr>
+                <th>ITEM NAME</th>
+                <th>OLD STOCK</th>
+                <th>RESTORED</th>
+                <th>CURRENT STOCK</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredInventory.length > 0 ? (
+                filteredInventory.map((entry, index) => (
+                  <tr key={index}>
+                    <td>{entry.item_name}</td>
+                    <td>
+                      {entry.old_stock}
+                      {entry.unit}
+                    </td>
+                    <td>
+                      {entry.restock_time} ({entry.added_stock}
+                      {entry.unit})
+                    </td>
+                    <td>
+                      {entry.current_stock}
+                      {entry.unit}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" className="no-records">
+                    {inventoryData.length === 0
+                      ? "No inventory history available"
+                      : "No matching inventory found"}
+                  </td>
                 </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {showReportModal && (
+        <div
+          className="report-modal"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.5)",
+            zIndex: 999,
+          }}
+        >
+          <div
+            className="modal-content"
+            style={{
+              position: "relative",
+              margin: "10% auto",
+              padding: "20px",
+              background: "#fff",
+              width: "80%",
+              maxWidth: "600px",
+              borderRadius: "8px",
+            }}
+          >
+            {/* Close Button in Top Right */}
+            <button
+              onClick={() => setShowReportModal(false)}
+              style={{
+                position: "absolute",
+                top: "10px",
+                right: "15px",
+                fontSize: "24px",
+                fontWeight: "bold",
+                border: "none",
+                background: "transparent",
+                cursor: "pointer",
+                color: "#333",
+              }}
+            >
+              ×
+            </button>
+
+            <h2>Order Report</h2>
+
+            {reportLoading ? (
+              <p>Loading...</p>
+            ) : reportError ? (
+              <p style={{ color: "red" }}>{reportError}</p>
+            ) : reportData.length > 0 ? (
+              reportData.map((report, index) => (
+                <div
+                  key={index}
+                  className="report-block"
+                  style={{ marginBottom: "20px" }}
+                >
+                  <p>
+                    <strong>Order ID:</strong> #{report.orderId}
+                  </p>
+                  <p>
+                    <strong>Table No:</strong> {report.tableNumber}
+                  </p>
+                  <p>
+                    <strong>Time:</strong>{" "}
+                    {new Date(report.time).toLocaleString()}
+                  </p>
+                  <p>
+                    <strong>Original Total:</strong> ₹{report.originalTotal}
+                  </p>
+                  <p>
+                    <strong>Final Total:</strong> ₹{report.finalTotal}
+                  </p>
+
+                  <h4>Edits:</h4>
+                  <ul
+                    className="report-list"
+                    style={{ listStyle: "none", paddingLeft: 0 }}
+                  >
+                    {report.edits.map((edit, i) => (
+                      <li
+                        key={i}
+                        style={{
+                          marginBottom: "10px",
+                          background: "#f5f5f5",
+                          padding: "10px",
+                          borderRadius: "5px",
+                        }}
+                      >
+                        {edit.type === "discount" ? (
+                          <>
+                            <strong>Discount Applied:</strong>
+                            <br />
+                            {edit.discountPercent} off — ₹{edit.oldFinalTotal} ➜
+                            ₹{edit.newFinalTotal}
+                            <br />
+                          </>
+                        ) : (
+                          <>
+                            <strong>{edit.itemName}</strong> — {edit.changeType}
+                            <br />
+                            Qty: {edit.changeQty}, Unit Price: ₹{edit.unitPrice}
+                            , Total: ₹{edit.total}
+                            <br />
+                          </>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))
             ) : (
-              <tr>
-                <td colSpan="4" className="no-records">
-                  {inventoryData.length === 0 ? 'No inventory history available' : 'No matching inventory found'}
-                </td>
-              </tr>
+              <p>No report data for this order.</p>
             )}
-          </tbody>
-        </table>
-      </div>
-      )
-      }
-{showReportModal && (
-  <div className="report-modal" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', zIndex: 999 }}>
-    <div className="modal-content" style={{ position: 'relative', margin: '10% auto', padding: '20px', background: '#fff', width: '80%', maxWidth: '600px', borderRadius: '8px' }}>
-      
-      {/* Close Button in Top Right */}
-      <button
-        onClick={() => setShowReportModal(false)}
-        style={{
-          position: 'absolute',
-          top: '10px',
-          right: '15px',
-          fontSize: '24px',
-          fontWeight: 'bold',
-          border: 'none',
-          background: 'transparent',
-          cursor: 'pointer',
-          color: '#333'
-        }}
-      >
-        ×
-      </button>
-
-      <h2>Order Report</h2>
-
-      {reportLoading ? (
-        <p>Loading...</p>
-      ) : reportError ? (
-        <p style={{ color: 'red' }}>{reportError}</p>
-      ) : reportData.length > 0 ? (
-        reportData.map((report, index) => (
-          <div key={index} className="report-block" style={{ marginBottom: '20px' }}>
-            <p><strong>Order ID:</strong> #{report.orderId}</p>
-            <p><strong>Table No:</strong> {report.tableNumber}</p>
-            <p><strong>Time:</strong> {new Date(report.time).toLocaleString()}</p>
-            <p><strong>Original Total:</strong> ₹{report.originalTotal}</p>
-            <p><strong>Final Total:</strong> ₹{report.finalTotal}</p>
-
-            <h4>Edits:</h4>
-            <ul className="report-list" style={{ listStyle: 'none', paddingLeft: 0 }}>
-              {report.edits.map((edit, i) => (
-                <li key={i} style={{ marginBottom: '10px', background: '#f5f5f5', padding: '10px', borderRadius: '5px' }}>
-                  {edit.type === "discount" ? (
-                    <>
-                      <strong>Discount Applied:</strong><br />
-                      {edit.discountPercent} off — ₹{edit.oldFinalTotal} ➜ ₹{edit.newFinalTotal}<br />
-                   
-                    </>
-                  ) : (
-                    <>
-                      <strong>{edit.itemName}</strong> — {edit.changeType}<br />
-                      Qty: {edit.changeQty}, Unit Price: ₹{edit.unitPrice}, Total: ₹{edit.total}<br />
-                
-                    </>
-                  )}
-                </li>
-              ))}
-            </ul>
           </div>
-        ))
-      ) : (
-        <p>No report data for this order.</p>
+        </div>
       )}
-    </div>
-  </div>
-)}
-
-
-    
     </div>
   );
 }
-
-
-
-
-
