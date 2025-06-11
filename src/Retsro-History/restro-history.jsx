@@ -870,10 +870,7 @@ export default function RestaurantHistory() {
                   <p>
                     <strong>Table No:</strong> {selectedOrder.table_no}
                   </p>
-                  <p>
-                    <strong>Date & Time:</strong>{" "}
-                    {formatDateTime(order.createdAt)}
-                  </p>
+                  
                   <p>
                     <strong>Status:</strong> Completed
                   </p>
